@@ -1,0 +1,223 @@
+const createServices = (revenueOfficeId, developmentOfficeId) => [
+  // =========================
+  // REVENUE OFFICE SERVICES
+  // =========================
+
+  {
+    officeId: revenueOfficeId,
+    name: "Income Certificate",
+    description: "Application and processing of income certificates.",
+    averageServiceTime: 10,
+    isActive: true,
+  },
+  {
+    officeId: revenueOfficeId,
+    name: "Caste Certificate",
+    description: "Application and processing of caste certificates.",
+    averageServiceTime: 15,
+    isActive: true,
+  },
+  {
+    officeId: revenueOfficeId,
+    name: "Residence Certificate",
+    description: "Application and processing of residence certificates.",
+    averageServiceTime: 10,
+    isActive: true,
+  },
+  {
+    officeId: revenueOfficeId,
+    name: "Domicile Certificate",
+    description: "Application for domicile and permanent residence certificates.",
+    averageServiceTime: 15,
+    isActive: true,
+  },
+  {
+    officeId: revenueOfficeId,
+    name: "Land Record Request",
+    description: "Request for land and revenue records.",
+    averageServiceTime: 20,
+    isActive: true,
+  },
+  {
+    officeId: revenueOfficeId,
+    name: "Land Ownership Certificate",
+    description: "Application for land ownership related documents.",
+    averageServiceTime: 20,
+    isActive: true,
+  },
+  {
+    officeId: revenueOfficeId,
+    name: "Land Mutation",
+    description: "Request to update ownership details in land records.",
+    averageServiceTime: 25,
+    isActive: true,
+  },
+  {
+    officeId: revenueOfficeId,
+    name: "Land Survey Request",
+    description: "Request for official land measurement and survey.",
+    averageServiceTime: 25,
+    isActive: true,
+  },
+  {
+    officeId: revenueOfficeId,
+    name: "Property Valuation Certificate",
+    description: "Application for property valuation related certificates.",
+    averageServiceTime: 20,
+    isActive: true,
+  },
+  {
+    officeId: revenueOfficeId,
+    name: "Legal Heir Certificate",
+    description: "Application for legal heir and succession related certificates.",
+    averageServiceTime: 20,
+    isActive: true,
+  },
+  {
+    officeId: revenueOfficeId,
+    name: "Agricultural Land Records",
+    description: "Request for agricultural land ownership and record details.",
+    averageServiceTime: 20,
+    isActive: true,
+  },
+  {
+    officeId: revenueOfficeId,
+    name: "Encumbrance Related Request",
+    description: "Request for land encumbrance and related revenue information.",
+    averageServiceTime: 20,
+    isActive: true,
+  },
+  {
+    officeId: revenueOfficeId,
+    name: "Revenue Grievance",
+    description: "Submission and handling of revenue-related grievances.",
+    averageServiceTime: 15,
+    isActive: true,
+  },
+  {
+    officeId: revenueOfficeId,
+    name: "Government Land Request",
+    description: "Application and enquiry related to government land.",
+    averageServiceTime: 25,
+    isActive: true,
+  },
+  {
+    officeId: revenueOfficeId,
+    name: "Other Revenue Services",
+    description: "General enquiries and other revenue-related services.",
+    averageServiceTime: 10,
+    isActive: true,
+  },
+
+  // =========================
+  // DEVELOPMENT OFFICE SERVICES
+  // =========================
+
+  {
+    officeId: developmentOfficeId,
+    name: "Pension Application",
+    description: "Application and assistance for government pension schemes.",
+    averageServiceTime: 15,
+    isActive: true,
+  },
+  {
+    officeId: developmentOfficeId,
+    name: "Welfare Scheme Application",
+    description: "Application for eligible government welfare schemes.",
+    averageServiceTime: 15,
+    isActive: true,
+  },
+  {
+    officeId: developmentOfficeId,
+    name: "Housing Scheme Application",
+    description: "Application for government rural housing schemes.",
+    averageServiceTime: 20,
+    isActive: true,
+  },
+  {
+    officeId: developmentOfficeId,
+    name: "Employment Scheme Application",
+    description: "Application and assistance for rural employment schemes.",
+    averageServiceTime: 15,
+    isActive: true,
+  },
+  {
+    officeId: developmentOfficeId,
+    name: "Rural Development Request",
+    description: "Request related to rural development activities.",
+    averageServiceTime: 20,
+    isActive: true,
+  },
+  {
+    officeId: developmentOfficeId,
+    name: "Sanitation Scheme Request",
+    description: "Request related to rural sanitation programs.",
+    averageServiceTime: 15,
+    isActive: true,
+  },
+  {
+    officeId: developmentOfficeId,
+    name: "Drinking Water Request",
+    description: "Complaints and requests related to rural drinking water facilities.",
+    averageServiceTime: 15,
+    isActive: true,
+  },
+  {
+    officeId: developmentOfficeId,
+    name: "Road Development Request",
+    description: "Request or complaint related to rural roads and infrastructure.",
+    averageServiceTime: 20,
+    isActive: true,
+  },
+  {
+    officeId: developmentOfficeId,
+    name: "Street Light Request",
+    description: "Request or complaint related to street lighting.",
+    averageServiceTime: 10,
+    isActive: true,
+  },
+  {
+    officeId: developmentOfficeId,
+    name: "Public Infrastructure Complaint",
+    description: "Complaints regarding public infrastructure and facilities.",
+    averageServiceTime: 15,
+    isActive: true,
+  },
+  {
+    officeId: developmentOfficeId,
+    name: "Self Help Group Assistance",
+    description: "Support and assistance related to self-help groups.",
+    averageServiceTime: 20,
+    isActive: true,
+  },
+  {
+    officeId: developmentOfficeId,
+    name: "Rural Development Scheme",
+    description: "Enquiry and application related to rural development schemes.",
+    averageServiceTime: 20,
+    isActive: true,
+  },
+  {
+    officeId: developmentOfficeId,
+    name: "Beneficiary Status Enquiry",
+    description: "Enquiry about government scheme beneficiary status.",
+    averageServiceTime: 10,
+    isActive: true,
+  },
+  {
+    officeId: developmentOfficeId,
+    name: "Grievance / Complaint",
+    description: "Submission and handling of citizen grievances.",
+    averageServiceTime: 10,
+    isActive: true,
+  },
+  {
+    officeId: developmentOfficeId,
+    name: "Other Development Services",
+    description: "General enquiries and other development-related services.",
+    averageServiceTime: 10,
+    isActive: true,
+  },
+];
+
+module.exports = createServices;

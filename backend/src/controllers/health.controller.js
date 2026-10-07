@@ -1,11 +1,15 @@
-import { getDatabaseStatus } from '../config/db.js';
+const { getDatabaseStatus } = require('../config/db');
 
-export function getHealth(_req, res) {
-  const database = getDatabaseStatus();
+const getHealth = (req, res) => {
+    const database = getDatabaseStatus();
 
-  res.status(200).json({
-    success: true,
-    message: 'QueueLess backend is running',
-    database,
-  });
-}
+    res.status(200).json({
+        success: true,
+        message: 'QueueLess backend is running',
+        database
+    });
+};
+
+module.exports = {
+    getHealth
+};

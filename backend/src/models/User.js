@@ -1,31 +1,57 @@
-import mongoose from 'mongoose';
+const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
 
-const userSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: [true, 'Name is required'],
-    trim: true,
-    minlength: [2, 'Name must be at least 2 characters'],
+const passportLocalMongooseRaw = require("passport-local-mongoose");
+const passportLocalMongoose =
+  passportLocalMongooseRaw.default || passportLocalMongooseRaw;
+
+const userSchema = new Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+    },
+
+    role: {
+      type: String,
+      enum: ["citizen", "operator", "admin"],
+      default: "citizen",
+    },
+
+    phone: {
+      type: String,
+      trim: true,
+    },
+
+    officeId: {
+      type: Schema.Types.ObjectId,
+      ref: "Office",
+    },
+
+    counterId: {
+      type: Schema.Types.ObjectId,
+      ref: "Counter",
+    },
   },
-  email: {
-    type: String,
-    required: [true, 'Email is required'],
-    unique: true,
-    lowercase: true,
-    trim: true,
-    match: [/^\S+@\S+\.\S+$/, 'Please provide a valid email'],
-  },
-  role: {
-    type: String,
-    enum: ['citizen', 'operator', 'admin'],
-    default: 'citizen',
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
+  {
+    timestamps: true,
+  }
+);
+
+userSchema.plugin(passportLocalMongoose, {
+  usernameField: "email",
+  usernameLowerCase: true,
 });
 
-const User = mongoose.model('User', userSchema);
+const User = mongoose.model("User", userSchema);
 
-export default User;
+module.exports = User;
