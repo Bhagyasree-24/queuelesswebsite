@@ -1,261 +1,355 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useCallback, useEffect, useState } from "react";
+import AdminLayout from "../../components/admin/AdminLayout";
+import {
+  Alert,
+  ConfirmDialog,
+  EmptyState,
+  ErrorBlock,
+  LoadingBlock,
+  Modal,
+  PageHeader,
+  StatusBadge,
+  inputClass,
+  labelClass,
+  primaryBtn,
+  secondaryBtn,
+  smallBtn,
+  smallDangerBtn,
+} from "../../components/admin/AdminUi";
+import {
+  assignStaff,
+  createStaff,
+  deleteStaff,
+  getOfficeCounters,
+  getOffices,
+  getStaff,
+  updateStaff,
+} from "../../services/adminApi";
 
-export default function Staff() {
-  const navigate = useNavigate();
+// staffId is the MongoDB User._id
+const staffIdOf = (member) => member._id || member.id;
 
-  // State to handle modal visibility and editing
-  const [manageStaff, setManageStaff] = useState(null);
+/**
+ * Office + counter pickers. The counter list is loaded from the selected
+ * office only, so a counter from another office can never be chosen.
+ */
+function AssignmentFields({ offices, officeId, counterId, onChange, disabled }) {
+  const [counters, setCounters] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  // Replaced custom `id` ("ST-001") with standard DB `_id`
-  const [staffList, setStaffList] = useState([
-    {
-      _id: "6501a01",
-      name: "Operator 01",
-      email: "operator01@example.com",
-      office: "RTO Office",
-      counter: "C-01",
-      status: "ACTIVE",
-    },
-    {
-      _id: "6501a02",
-      name: "Operator 02",
-      email: "operator02@example.com",
-      office: "RTO Office",
-      counter: "C-02",
-      status: "ACTIVE",
-    },
-    {
-      _id: "6501a03",
-      name: "Operator 03",
-      email: "operator03@example.com",
-      office: "RTO Office",
-      counter: "C-03",
-      status: "PAUSED",
-    },
-    {
-      _id: "6501a04",
-      name: "Operator 04",
-      email: "operator04@example.com",
-      office: "RTO Office",
-      counter: "C-04",
-      status: "ACTIVE",
-    },
-    {
-      _id: "6501a05",
-      name: "Operator 05",
-      email: "operator05@example.com",
-      office: "Municipal Office",
-      counter: "C-05",
-      status: "ACTIVE",
-    },
-    {
-      _id: "6501a06",
-      name: "Operator 06",
-      email: "operator06@example.com",
-      office: "Municipal Office",
-      counter: "C-06",
-      status: "ACTIVE",
-    },
-    {
-      _id: "6501a07",
-      name: "Operator 07",
-      email: "operator07@example.com",
-      office: "Municipal Office",
-      counter: "C-07",
-      status: "PAUSED",
-    },
-    {
-      _id: "6501a08",
-      name: "Operator 08",
-      email: "operator08@example.com",
-      office: "Municipal Office",
-      counter: "C-08",
-      status: "ACTIVE",
-    },
-  ]);
+  useEffect(() => {
+    if (!officeId) {
+      setCounters([]);
+      return;
+    }
 
-  // Handle saving changes from the modal form
-  const handleSave = (e) => {
-    e.preventDefault();
-    setStaffList((prev) =>
-      prev.map((item) => (item._id === manageStaff._id ? manageStaff : item))
-    );
-    setManageStaff(null);
-  };
+    let cancelled = false;
+    setLoading(true);
+    setError("");
+
+    getOfficeCounters(officeId)
+      .then((list) => {
+        if (!cancelled) {
+          setCounters([...list].sort((a, b) => (a.number ?? 0) - (b.number ?? 0)));
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) setError(err.message);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [officeId]);
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <button
-            type="button"
-            onClick={() => navigate("/admin")}
-            className="text-2xl font-bold tracking-tight"
-          >
-            <span className="text-slate-900">Queue</span>
-            <span className="text-blue-600">Less</span>
-          </button>
+    <>
+      <div>
+        <label htmlFor="assignOffice" className={labelClass}>Office</label>
+        <select
+          id="assignOffice"
+          value={officeId}
+          onChange={(e) => onChange(e.target.value, "")}
+          disabled={disabled}
+          className={inputClass}
+        >
+          <option value="">Select an office</option>
+          {offices.map((office) => (
+            <option key={office._id} value={office._id}>{office.name}</option>
+          ))}
+        </select>
+      </div>
 
-          <button
-            type="button"
-            onClick={() => navigate("/admin")}
-            className="rounded-xl px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100"
-          >
-            ← Dashboard
-          </button>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        {/* Heading */}
-        <section>
-          <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">
-            Administration
+      <div>
+        <label htmlFor="assignCounter" className={labelClass}>Counter</label>
+        <select
+          id="assignCounter"
+          value={counterId}
+          onChange={(e) => onChange(officeId, e.target.value)}
+          disabled={disabled || !officeId || loading}
+          className={inputClass}
+        >
+          <option value="">
+            {!officeId ? "Select an office first" : loading ? "Loading counters..." : "Select a counter"}
+          </option>
+          {counters.map((counter) => (
+            <option key={counter._id} value={counter._id}>
+              {counter.name} (#{counter.number}) · {counter.status}
+            </option>
+          ))}
+        </select>
+        {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
+        {officeId && !loading && !error && counters.length === 0 && (
+          <p className="mt-1 text-xs text-amber-600">
+            This office has no counters. Create one on the Counters page first.
           </p>
+        )}
+      </div>
+    </>
+  );
+}
 
-          <h1 className="mt-2 text-3xl font-bold text-slate-900 sm:text-4xl">
-            Staff
-          </h1>
+const EMPTY_CREATE = { name: "", email: "", password: "", phone: "", officeId: "", counterId: "" };
 
-          <p className="mt-2 text-slate-600">
-            Manage government staff and their office and counter assignments.
-          </p>
-        </section>
+export default function Staff({ user, setUser }) {
+  const [staff, setStaff] = useState([]);
+  const [offices, setOffices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
 
-        {/* Summary Stats */}
-        <section className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <p className="text-sm text-slate-500">Total Staff</p>
-            <p className="mt-2 text-3xl font-bold text-slate-900">
-              {staffList.length}
-            </p>
-          </div>
+  // modal: null | { type: "create" } | { type: "edit"|"assign"|"delete", member }
+  const [modal, setModal] = useState(null);
+  const [createForm, setCreateForm] = useState(EMPTY_CREATE);
+  const [editForm, setEditForm] = useState({ name: "", email: "", phone: "" });
+  const [assignForm, setAssignForm] = useState({ officeId: "", counterId: "" });
+  const [formError, setFormError] = useState("");
+  const [busy, setBusy] = useState(false);
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <p className="text-sm text-slate-500">Active</p>
-            <p className="mt-2 text-3xl font-bold text-green-600">
-              {staffList.filter((s) => s.status === "ACTIVE").length}
-            </p>
-          </div>
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const [staffList, officeList] = await Promise.all([getStaff(), getOffices()]);
+      setStaff(staffList);
+      setOffices(officeList);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <p className="text-sm text-slate-500">Paused</p>
-            <p className="mt-2 text-3xl font-bold text-orange-500">
-              {staffList.filter((s) => s.status === "PAUSED").length}
-            </p>
-          </div>
+  useEffect(() => {
+    load();
+  }, [load]);
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <p className="text-sm text-slate-500">Assigned Counters</p>
-            <p className="mt-2 text-3xl font-bold text-blue-600">
-              {staffList.filter((s) => s.counter && s.counter !== "-").length}
-            </p>
-          </div>
-        </section>
+  function closeModal() {
+    if (!busy) setModal(null);
+  }
 
-        {/* Staff Table */}
-        <section className="mt-8">
-          <div>
-            <h2 className="text-xl font-bold text-slate-900">
-              Staff Overview
-            </h2>
+  function openCreate() {
+    setCreateForm(EMPTY_CREATE);
+    setFormError("");
+    setModal({ type: "create" });
+  }
 
-            <p className="mt-1 text-sm text-slate-500">
-              Current operators and their assignments.
-            </p>
-          </div>
+  function openEdit(member) {
+    setEditForm({
+      name: member.name || "",
+      email: member.email || "",
+      phone: member.phone || "",
+    });
+    setFormError("");
+    setModal({ type: "edit", member });
+  }
 
-          <div className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+  function openAssign(member) {
+    setAssignForm({
+      officeId: member.officeId?._id || "",
+      counterId: member.counterId?._id || "",
+    });
+    setFormError("");
+    setModal({ type: "assign", member });
+  }
+
+  function openDelete(member) {
+    setFormError("");
+    setModal({ type: "delete", member });
+  }
+
+  // Runs a mutation, then refreshes server data.
+  async function run(action, onSuccessMessage) {
+    setBusy(true);
+    setFormError("");
+    try {
+      const result = await action();
+      setModal(null);
+      setNotice(result?.message || onSuccessMessage);
+      await load();
+    } catch (err) {
+      setFormError(err.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function handleCreate(event) {
+    event.preventDefault();
+    const { name, email, password, phone, officeId, counterId } = createForm;
+
+    if (!name.trim()) return setFormError("Name is required.");
+    if (!email.trim()) return setFormError("Email is required.");
+    if (password.length < 6) return setFormError("Password must be at least 6 characters.");
+    if (!officeId) return setFormError("Select an office.");
+    if (!counterId) return setFormError("Select a counter.");
+
+    const body = {
+      name: name.trim(),
+      email: email.trim(),
+      password,
+      officeId,
+      counterId,
+    };
+    if (phone.trim()) body.phone = phone.trim();
+
+    run(() => createStaff(body), "Operator created.");
+  }
+
+  function handleEdit(event) {
+    event.preventDefault();
+    const name = editForm.name.trim();
+    const email = editForm.email.trim();
+
+    if (!name) return setFormError("Name is required.");
+    if (!email) return setFormError("Email is required.");
+
+    run(
+      () =>
+        updateStaff(staffIdOf(modal.member), {
+          name,
+          email,
+          phone: editForm.phone.trim(),
+        }),
+      "Operator updated."
+    );
+  }
+
+  function handleAssign(event) {
+    event.preventDefault();
+    if (!assignForm.officeId) return setFormError("Select an office.");
+    if (!assignForm.counterId) return setFormError("Select a counter.");
+
+    run(
+      () => assignStaff(staffIdOf(modal.member), assignForm.officeId, assignForm.counterId),
+      "Assignment updated."
+    );
+  }
+
+  function handleDelete() {
+    run(() => deleteStaff(staffIdOf(modal.member)), "Operator deleted.");
+  }
+
+  const formButtons = (label) => (
+    <div className="flex gap-3 border-t border-slate-200 p-6">
+      <button type="button" onClick={closeModal} disabled={busy} className={`${secondaryBtn} flex-1`}>
+        Cancel
+      </button>
+      <button type="submit" disabled={busy} className={`${primaryBtn} flex-1`}>
+        {busy ? "Saving..." : label}
+      </button>
+    </div>
+  );
+
+  return (
+    <AdminLayout user={user} setUser={setUser}>
+      <PageHeader
+        title="Staff"
+        description="Operators who manage counters. Each operator is assigned to one office and counter."
+        action={
+          !loading &&
+          !error && (
+            <button type="button" onClick={openCreate} className={primaryBtn}>
+              + Add operator
+            </button>
+          )
+        }
+      />
+
+      <div className="mt-8 space-y-6">
+        {notice && (
+          <Alert type="success" onClose={() => setNotice("")}>
+            {notice}
+          </Alert>
+        )}
+
+        {loading && <LoadingBlock label="Loading staff..." />}
+        {!loading && error && <ErrorBlock message={error} onRetry={load} />}
+
+        {!loading && !error && staff.length === 0 && (
+          <EmptyState
+            icon="👥"
+            title="No operators yet"
+            description="Create an operator account and assign it to an office counter."
+            action={
+              <button type="button" onClick={openCreate} className={primaryBtn}>
+                + Add operator
+              </button>
+            }
+          />
+        )}
+
+        {!loading && !error && staff.length > 0 && (
+          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[950px] text-left">
+              <table className="w-full min-w-[860px] text-left">
                 <thead>
-                  <tr className="border-b border-slate-200 bg-slate-50">
-                    <th className="px-5 py-4 text-sm font-semibold text-slate-600">
-                      Staff
-                    </th>
-
-                    <th className="px-5 py-4 text-sm font-semibold text-slate-600">
-                      Email
-                    </th>
-
-                    <th className="px-5 py-4 text-sm font-semibold text-slate-600">
-                      Office
-                    </th>
-
-                    <th className="px-5 py-4 text-sm font-semibold text-slate-600">
-                      Counter
-                    </th>
-
-                    <th className="px-5 py-4 text-sm font-semibold text-slate-600">
-                      Status
-                    </th>
-
-                    <th className="px-5 py-4 text-sm font-semibold text-slate-600">
-                      Action
-                    </th>
+                  <tr className="border-b border-slate-200 bg-slate-50 text-sm font-semibold text-slate-600">
+                    <th className="px-5 py-4">Operator</th>
+                    <th className="px-5 py-4">Phone</th>
+                    <th className="px-5 py-4">Office</th>
+                    <th className="px-5 py-4">Counter</th>
+                    <th className="px-5 py-4">Actions</th>
                   </tr>
                 </thead>
-
                 <tbody>
-                  {staffList.map((member, index) => (
-                    <tr
-                      key={member._id}
-                      className="border-b border-slate-100 last:border-0"
-                    >
-                      <td className="px-5 py-5">
+                  {staff.map((member) => (
+                    <tr key={staffIdOf(member) || member.email} className="border-b border-slate-100 last:border-0">
+                      <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-100 to-purple-100 font-semibold text-blue-600">
-                            {member.name.charAt(0).toUpperCase()}
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-100 to-purple-100 font-semibold text-blue-600">
+                            {(member.name || "?").charAt(0).toUpperCase()}
                           </div>
-
                           <div>
-                            <p className="font-semibold text-slate-900">
-                              {member.name}
-                            </p>
-
-                            {/* Dynamic Display Tag (No need for custom ST-XXX in database) */}
-                            <p className="mt-0.5 text-xs text-slate-500">
-                              ID: #{String(index + 1).padStart(3, "0")}
-                            </p>
+                            <p className="font-semibold text-slate-900">{member.name}</p>
+                            <p className="text-sm text-slate-500">{member.email}</p>
                           </div>
                         </div>
                       </td>
-
-                      <td className="px-5 py-5 text-sm text-slate-600">
-                        {member.email}
+                      <td className="px-5 py-4 text-sm text-slate-600">{member.phone || "—"}</td>
+                      <td className="px-5 py-4 text-sm text-slate-600">
+                        {member.officeId ? member.officeId.name : <span className="text-amber-600">Unassigned</span>}
                       </td>
-
-                      <td className="px-5 py-5 text-sm text-slate-600">
-                        {member.office}
+                      <td className="px-5 py-4 text-sm text-slate-600">
+                        {member.counterId ? (
+                          <div className="flex items-center gap-2">
+                            <span>{member.counterId.name}</span>
+                            <StatusBadge status={member.counterId.status} />
+                          </div>
+                        ) : (
+                          <span className="text-amber-600">Unassigned</span>
+                        )}
                       </td>
-
-                      <td className="px-5 py-5 text-sm font-semibold text-slate-700">
-                        {member.counter}
-                      </td>
-
-                      <td className="px-5 py-5">
-                        <span
-                          className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                            member.status === "ACTIVE"
-                              ? "bg-green-100 text-green-700"
-                              : "bg-orange-100 text-orange-700"
-                          }`}
-                        >
-                          {member.status}
-                        </span>
-                      </td>
-
-                      <td className="px-5 py-5">
-                        <button
-                          type="button"
-                          onClick={() => setManageStaff({ ...member })}
-                          className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-                        >
-                          Manage
-                        </button>
+                      <td className="px-5 py-4">
+                        <div className="flex gap-2">
+                          <button type="button" onClick={() => openEdit(member)} className={smallBtn}>Edit</button>
+                          <button type="button" onClick={() => openAssign(member)} className={smallBtn}>Assign</button>
+                          <button type="button" onClick={() => openDelete(member)} className={smallDangerBtn}>Delete</button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -263,192 +357,108 @@ export default function Staff() {
               </table>
             </div>
           </div>
-        </section>
+        )}
+      </div>
 
-        {/* Info */}
-        <section className="mt-8 rounded-2xl border border-blue-100 bg-blue-50 p-5">
-          <div className="flex gap-3">
-            <span className="text-xl">ℹ️</span>
+      {modal?.type === "create" && (
+        <Modal title="Add operator" subtitle="Creates an operator account and assigns it to a counter." onClose={closeModal}>
+          <form onSubmit={handleCreate} noValidate>
+            <div className="space-y-5 p-6">
+              {formError && <Alert>{formError}</Alert>}
 
-            <div>
-              <h3 className="font-semibold text-slate-900">
-                Staff assignments
-              </h3>
-
-              <p className="mt-1 text-sm leading-6 text-slate-600">
-                Each operator is assigned to a government office and counter.
-                Operators manage queue activity from the Operator Portal.
-              </p>
-            </div>
-          </div>
-        </section>
-      </main>
-
-      {/* Manage Staff Modal */}
-      {manageStaff && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4"
-          onClick={() => setManageStaff(null)}
-        >
-          <div
-            className="flex max-h-[90vh] w-full max-w-lg flex-col rounded-2xl bg-white shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Modal Header */}
-            <div className="flex shrink-0 items-center justify-between border-b border-slate-200 p-6">
               <div>
-                <h2 className="text-xl font-bold text-slate-900">
-                  Manage Staff Member
-                </h2>
-                <p className="mt-1 text-sm text-slate-500">
-                  Update staff details and assignments
-                </p>
+                <label htmlFor="createName" className={labelClass}>Full name</label>
+                <input id="createName" type="text" value={createForm.name} disabled={busy}
+                  onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })} className={inputClass} />
+              </div>
+              <div>
+                <label htmlFor="createEmail" className={labelClass}>Email</label>
+                <input id="createEmail" type="email" value={createForm.email} disabled={busy}
+                  onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })} className={inputClass} />
+              </div>
+              <div>
+                <label htmlFor="createPassword" className={labelClass}>Password</label>
+                <input id="createPassword" type="password" autoComplete="new-password" value={createForm.password} disabled={busy}
+                  onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })} className={inputClass} />
+                <p className="mt-1 text-xs text-slate-500">At least 6 characters.</p>
+              </div>
+              <div>
+                <label htmlFor="createPhone" className={labelClass}>
+                  Phone <span className="font-normal text-slate-400">(optional)</span>
+                </label>
+                <input id="createPhone" type="tel" value={createForm.phone} disabled={busy}
+                  onChange={(e) => setCreateForm({ ...createForm, phone: e.target.value })} className={inputClass} />
               </div>
 
-              <button
-                type="button"
-                onClick={() => setManageStaff(null)}
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-xl text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
-              >
-                ×
-              </button>
+              <AssignmentFields
+                offices={offices}
+                officeId={createForm.officeId}
+                counterId={createForm.counterId}
+                disabled={busy}
+                onChange={(officeId, counterId) => setCreateForm({ ...createForm, officeId, counterId })}
+              />
             </div>
-
-            {/* Scrollable Form Body */}
-            <form onSubmit={handleSave} className="flex flex-1 flex-col overflow-hidden">
-              <div className="flex-1 space-y-5 overflow-y-auto p-6">
-                {/* Full Name */}
-                <div>
-                  <label
-                    htmlFor="staffName"
-                    className="text-sm font-semibold text-slate-700"
-                  >
-                    Full Name
-                  </label>
-                  <input
-                    id="staffName"
-                    type="text"
-                    value={manageStaff.name}
-                    onChange={(e) =>
-                      setManageStaff({ ...manageStaff, name: e.target.value })
-                    }
-                    className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    required
-                  />
-                </div>
-
-                {/* Email */}
-                <div>
-                  <label
-                    htmlFor="staffEmail"
-                    className="text-sm font-semibold text-slate-700"
-                  >
-                    Email Address
-                  </label>
-                  <input
-                    id="staffEmail"
-                    type="email"
-                    value={manageStaff.email}
-                    onChange={(e) =>
-                      setManageStaff({ ...manageStaff, email: e.target.value })
-                    }
-                    className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    required
-                  />
-                </div>
-
-                {/* Government Office */}
-                <div>
-                  <label
-                    htmlFor="staffOffice"
-                    className="text-sm font-semibold text-slate-700"
-                  >
-                    Assigned Office
-                  </label>
-                  <select
-                    id="staffOffice"
-                    value={manageStaff.office}
-                    onChange={(e) =>
-                      setManageStaff({ ...manageStaff, office: e.target.value })
-                    }
-                    className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  >
-                    <option value="RTO Office">RTO Office</option>
-                    <option value="Municipal Office">Municipal Office</option>
-                  </select>
-                </div>
-
-                {/* Counter Assignment */}
-                <div>
-                  <label
-                    htmlFor="staffCounter"
-                    className="text-sm font-semibold text-slate-700"
-                  >
-                    Assigned Counter
-                  </label>
-                  <select
-                    id="staffCounter"
-                    value={manageStaff.counter}
-                    onChange={(e) =>
-                      setManageStaff({ ...manageStaff, counter: e.target.value })
-                    }
-                    className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  >
-                    <option value="C-01">C-01</option>
-                    <option value="C-02">C-02</option>
-                    <option value="C-03">C-03</option>
-                    <option value="C-04">C-04</option>
-                    <option value="C-05">C-05</option>
-                    <option value="C-06">C-06</option>
-                    <option value="C-07">C-07</option>
-                    <option value="C-08">C-08</option>
-                  </select>
-                </div>
-
-                {/* Account Status */}
-                <div>
-                  <label
-                    htmlFor="staffStatus"
-                    className="text-sm font-semibold text-slate-700"
-                  >
-                    Account Status
-                  </label>
-                  <select
-                    id="staffStatus"
-                    value={manageStaff.status}
-                    onChange={(e) =>
-                      setManageStaff({ ...manageStaff, status: e.target.value })
-                    }
-                    className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  >
-                    <option value="ACTIVE">Active</option>
-                    <option value="PAUSED">Paused</option>
-                    <option value="INACTIVE">Inactive</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Modal Footer */}
-              <div className="flex shrink-0 gap-3 border-t border-slate-200 p-6">
-                <button
-                  type="button"
-                  onClick={() => setManageStaff(null)}
-                  className="flex-1 rounded-xl border border-slate-200 px-5 py-3 font-semibold text-slate-700 transition hover:bg-slate-50"
-                >
-                  Cancel
-                </button>
-
-                <button
-                  type="submit"
-                  className="flex-1 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-5 py-3 font-semibold text-white transition hover:from-blue-700 hover:to-purple-700"
-                >
-                  Save Changes
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+            {formButtons("Create operator")}
+          </form>
+        </Modal>
       )}
-    </div>
+
+      {modal?.type === "edit" && (
+        <Modal title="Edit operator" subtitle="Name, email and phone. Use Assign to change office or counter." onClose={closeModal}>
+          <form onSubmit={handleEdit} noValidate>
+            <div className="space-y-5 p-6">
+              {formError && <Alert>{formError}</Alert>}
+
+              <div>
+                <label htmlFor="editName" className={labelClass}>Full name</label>
+                <input id="editName" type="text" value={editForm.name} disabled={busy}
+                  onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} className={inputClass} />
+              </div>
+              <div>
+                <label htmlFor="editEmail" className={labelClass}>Email</label>
+                <input id="editEmail" type="email" value={editForm.email} disabled={busy}
+                  onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} className={inputClass} />
+              </div>
+              <div>
+                <label htmlFor="editPhone" className={labelClass}>Phone</label>
+                <input id="editPhone" type="tel" value={editForm.phone} disabled={busy}
+                  onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} className={inputClass} />
+              </div>
+            </div>
+            {formButtons("Save changes")}
+          </form>
+        </Modal>
+      )}
+
+      {modal?.type === "assign" && (
+        <Modal title="Assign operator" subtitle={modal.member.name} onClose={closeModal}>
+          <form onSubmit={handleAssign} noValidate>
+            <div className="space-y-5 p-6">
+              {formError && <Alert>{formError}</Alert>}
+              <AssignmentFields
+                offices={offices}
+                officeId={assignForm.officeId}
+                counterId={assignForm.counterId}
+                disabled={busy}
+                onChange={(officeId, counterId) => setAssignForm({ officeId, counterId })}
+              />
+            </div>
+            {formButtons("Save assignment")}
+          </form>
+        </Modal>
+      )}
+
+      {modal?.type === "delete" && (
+        <ConfirmDialog
+          title="Delete operator?"
+          message={`${modal.member.name} (${modal.member.email}) will be permanently deleted. An operator whose counter is currently calling or serving a token cannot be deleted.`}
+          confirmLabel="Delete operator"
+          busy={busy}
+          error={formError}
+          onConfirm={handleDelete}
+          onCancel={closeModal}
+        />
+      )}
+    </AdminLayout>
   );
 }

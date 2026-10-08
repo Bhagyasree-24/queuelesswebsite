@@ -1,4 +1,6 @@
+import { useEffect, useState } from "react";
 import { Routes, Route } from "react-router-dom";
+import { getCurrentUser } from "./services/authApi";
 
 import Landing from "./pages/public/Landing";
 import Login from "./pages/public/Login";
@@ -22,48 +24,82 @@ import Staff from "./pages/admin/Staff";
 import Analytics from "./pages/admin/Analytics";
 
 export default function App() {
+  const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+
+  useEffect(() => {
+    async function checkAuth() {
+      try {
+        const data = await getCurrentUser();
+
+        if (data.user) {
+          setUser(data.user);
+        }
+      } catch (error) {
+        console.error("Auth check failed:", error);
+      } finally {
+        setAuthLoading(false);
+      }
+    }
+
+    checkAuth();
+  }, []);
+
+  if (authLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-50">
+        <p className="text-slate-600">Loading...</p>
+      </div>
+    );
+  }
+
   return (
     <Routes>
+      {/* Public */}
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
-      <Route path="/citizen" element={<CitizenHome />} />
+      {/* Citizen */}
+      <Route path="/citizen" element={<CitizenHome user={user} />} />
       <Route
         path="/citizen/offices/:officeId/services"
-        element={<Services />}
+        element={<Services user={user} />}
       />
       <Route
         path="/citizen/offices/:officeId/services/:serviceId/queue"
-        element={<QueuePreview />}
+        element={<QueuePreview user={user} />}
       />
       <Route
         path="/citizen/token/:tokenId"
-        element={<ActiveToken />}
+        element={<ActiveToken user={user} />}
       />
       <Route
         path="/citizen/offices/:officeId/crowd"
-        element={<PeakHours />}
+        element={<PeakHours user={user} />}
       />
 
-      <Route path="/operator" element={<OperatorDashboard />} />
-      <Route path="/operator/queue" element={<OperatorQueue />} />
+      {/* Operator */}
+      <Route
+        path="/operator"
+        element={<OperatorDashboard user={user} />}
+      />
+      <Route
+        path="/operator/queue"
+        element={<OperatorQueue user={user} />}
+      />
       <Route
         path="/operator/counter"
-        element={<CounterControl />}
+        element={<CounterControl user={user} />}
       />
 
-      <Route path="/admin" element={<AdminDashboard />} />
-      <Route path="/admin/offices" element={<Offices />} />
-      <Route
-        path="/admin/services"
-        element={<AdminServices />}
-      />
-      <Route path="/admin/counters" element={<Counters />} />
-      <Route path="/admin/staff" element={<Staff />} />
-      <Route path="/admin/analytics" element={<Analytics />} />
-
+      {/* Admin */}
+      <Route path="/admin" element={<AdminDashboard user={user} />} />
+      <Route path="/admin/offices" element={<Offices user={user} />} />
+      <Route path="/admin/services" element={<AdminServices user={user} />} />
+      <Route path="/admin/counters" element={<Counters user={user} />} />
+      <Route path="/admin/staff" element={<Staff user={user} />} />
+      <Route path="/admin/analytics" element={<Analytics user={user} />} />
     </Routes>
-    
   );
 }

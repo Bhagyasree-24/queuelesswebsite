@@ -15,6 +15,15 @@ const {
   deleteStaff,
   updateStaffAssignment
 } = require('../controllers/admin.controller');
+const validate = require('../middleware/validate');
+
+const {
+  createCounterSchema,
+  updateCounterSchema,
+  createStaffSchema,
+  updateStaffSchema,
+  staffAssignmentSchema
+} = require('../schemas/admin.schema');
 
 const router = express.Router();
 
@@ -24,15 +33,41 @@ router.use(requireAuth, requireRole('admin'));
 // Office & Counter management
 router.get('/offices', wrapAsync(getOffices));
 router.get('/offices/:officeId/counters', wrapAsync(getOfficeCounters));
-router.post('/offices/:officeId/counters', wrapAsync(createCounter));
-router.put('/counters/:counterId', wrapAsync(updateCounter));
+
+router.post(
+  '/offices/:officeId/counters',
+  validate(createCounterSchema),
+  wrapAsync(createCounter)
+);
+
+router.put(
+  '/counters/:counterId',
+  validate(updateCounterSchema),
+  wrapAsync(updateCounter)
+);
+
 router.delete('/counters/:counterId', wrapAsync(deleteCounter));
 
 // Staff management
 router.get('/staff', wrapAsync(getStaff));
-router.post('/staff', wrapAsync(createStaff));
-router.put('/staff/:staffId', wrapAsync(updateStaff));
-router.delete('/staff/:staffId', wrapAsync(deleteStaff));
-router.patch('/staff/:staffId/assignment', wrapAsync(updateStaffAssignment));
 
+router.post(
+  '/staff',
+  validate(createStaffSchema),
+  wrapAsync(createStaff)
+);
+
+router.put(
+  '/staff/:staffId',
+  validate(updateStaffSchema),
+  wrapAsync(updateStaff)
+);
+
+router.delete('/staff/:staffId', wrapAsync(deleteStaff));
+
+router.patch(
+  '/staff/:staffId/assignment',
+  validate(staffAssignmentSchema),
+  wrapAsync(updateStaffAssignment)
+);
 module.exports = router;

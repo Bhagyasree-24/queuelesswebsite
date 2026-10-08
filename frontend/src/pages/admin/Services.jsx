@@ -1,378 +1,375 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import AdminLayout from "../../components/admin/AdminLayout";
+import {
+  Alert,
+  ConfirmDialog,
+  EmptyState,
+  ErrorBlock,
+  LoadingBlock,
+  Modal,
+  PageHeader,
+  StatusBadge,
+  inputClass,
+  labelClass,
+  primaryBtn,
+  secondaryBtn,
+  smallBtn,
+  smallDangerBtn,
+} from "../../components/admin/AdminUi";
+import {
+  createService,
+  deactivateService,
+  getOfficeServices,
+  getOffices,
+  updateService,
+} from "../../services/adminApi";
 
-export default function Services() {
-  const navigate = useNavigate();
+const EMPTY_FORM = { name: "", description: "", averageServiceTime: "" };
 
-  const [manageService, setManageService] = useState(null);
+export default function Services({ user, setUser }) {
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const services = [
-    {
-      id: 1,
-      name: "Driving License",
-      office: "RTO Office",
-      averageTime: 10,
-      counters: 2,
-      status: "ACTIVE",
-    },
-    {
-      id: 2,
-      name: "Vehicle Registration",
-      office: "RTO Office",
-      averageTime: 15,
-      counters: 1,
-      status: "ACTIVE",
-    },
-    {
-      id: 3,
-      name: "Document Verification",
-      office: "RTO Office",
-      averageTime: 5,
-      counters: 1,
-      status: "ACTIVE",
-    },
-    {
-      id: 4,
-      name: "Birth Certificate",
-      office: "Municipal Office",
-      averageTime: 8,
-      counters: 1,
-      status: "ACTIVE",
-    },
-    {
-      id: 5,
-      name: "Property Tax",
-      office: "Municipal Office",
-      averageTime: 12,
-      counters: 2,
-      status: "ACTIVE",
-    },
-    {
-      id: 6,
-      name: "Water Connection",
-      office: "Municipal Office",
-      averageTime: 10,
-      counters: 1,
-      status: "ACTIVE",
-    },
-  ];
+  const [offices, setOffices] = useState([]);
+  const [officesLoading, setOfficesLoading] = useState(true);
+  const [officesError, setOfficesError] = useState("");
+
+  const [services, setServices] = useState([]);
+  const [servicesLoading, setServicesLoading] = useState(false);
+  const [servicesError, setServicesError] = useState("");
+
+  const [notice, setNotice] = useState("");
+
+  // form modal: null | { mode: "create" } | { mode: "edit", service }
+  const [formModal, setFormModal] = useState(null);
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [formError, setFormError] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  // deactivate confirm
+  const [toDeactivate, setToDeactivate] = useState(null);
+  const [deactivating, setDeactivating] = useState(false);
+  const [deactivateError, setDeactivateError] = useState("");
+
+  // selected office comes from ?office=ID, falling back to the first office
+  const requested = searchParams.get("office");
+  const selectedOffice =
+    offices.find((o) => o._id === requested) || offices[0] || null;
+  const officeId = selectedOffice?._id;
+
+  const loadOffices = useCallback(async () => {
+    setOfficesLoading(true);
+    setOfficesError("");
+    try {
+      setOffices(await getOffices());
+    } catch (err) {
+      setOfficesError(err.message);
+    } finally {
+      setOfficesLoading(false);
+    }
+  }, []);
+
+  const loadServices = useCallback(async () => {
+    if (!officeId) return;
+    setServicesLoading(true);
+    setServicesError("");
+    try {
+      setServices(await getOfficeServices(officeId));
+    } catch (err) {
+      setServicesError(err.message);
+    } finally {
+      setServicesLoading(false);
+    }
+  }, [officeId]);
+
+  useEffect(() => {
+    loadOffices();
+  }, [loadOffices]);
+
+  useEffect(() => {
+    loadServices();
+  }, [loadServices]);
+
+  function openCreate() {
+    setForm(EMPTY_FORM);
+    setFormError("");
+    setFormModal({ mode: "create" });
+  }
+
+  function openEdit(service) {
+    setForm({
+      name: service.name || "",
+      description: service.description || "",
+      averageServiceTime: String(service.averageServiceTime ?? ""),
+    });
+    setFormError("");
+    setFormModal({ mode: "edit", service });
+  }
+
+  function closeForm() {
+    if (!saving) setFormModal(null);
+  }
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+
+    const name = form.name.trim();
+    const time = Number(form.averageServiceTime);
+
+    if (!name) return setFormError("Service name is required.");
+    if (!Number.isInteger(time) || time < 1) {
+      return setFormError("Average service time must be a whole number of at least 1 minute.");
+    }
+
+    const body = {
+      name,
+      description: form.description.trim(),
+      averageServiceTime: time,
+    };
+
+    setSaving(true);
+    setFormError("");
+
+    try {
+      const result =
+        formModal.mode === "edit"
+          ? await updateService(formModal.service._id, body)
+          : await createService(officeId, body);
+
+      setFormModal(null);
+      setNotice(result.message || "Saved.");
+      await loadServices();
+    } catch (err) {
+      setFormError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleDeactivate() {
+    setDeactivating(true);
+    setDeactivateError("");
+
+    try {
+      const result = await deactivateService(toDeactivate._id);
+      setToDeactivate(null);
+      setNotice(result.message || "Service deactivated.");
+      await loadServices();
+    } catch (err) {
+      setDeactivateError(err.message);
+    } finally {
+      setDeactivating(false);
+    }
+  }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <button
-            type="button"
-            onClick={() => navigate("/admin")}
-            className="text-2xl font-bold tracking-tight"
-          >
-            <span className="text-slate-900">Queue</span>
-            <span className="text-blue-600">Less</span>
-          </button>
+    <AdminLayout user={user} setUser={setUser}>
+      <PageHeader
+        title="Services"
+        description="Manage the services offered by each government office."
+        action={
+          selectedOffice && (
+            <button type="button" onClick={openCreate} className={primaryBtn}>
+              + Add service
+            </button>
+          )
+        }
+      />
 
-          <button
-            type="button"
-            onClick={() => navigate("/admin")}
-            className="rounded-xl px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100"
-          >
-            ← Dashboard
-          </button>
-        </div>
-      </header>
+      <div className="mt-8 space-y-6">
+        {notice && (
+          <Alert type="success" onClose={() => setNotice("")}>
+            {notice}
+          </Alert>
+        )}
 
-      {/* Main */}
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        {/* Heading */}
-        <section>
-          <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">
-            Administration
-          </p>
+        {officesLoading && <LoadingBlock label="Loading offices..." />}
+        {!officesLoading && officesError && (
+          <ErrorBlock message={officesError} onRetry={loadOffices} />
+        )}
 
-          <h1 className="mt-2 text-3xl font-bold text-slate-900 sm:text-4xl">
-            Services
-          </h1>
+        {!officesLoading && !officesError && offices.length === 0 && (
+          <EmptyState icon="🏛️" title="No offices found" description="Services belong to an office, and none were returned by the backend." />
+        )}
 
-          <p className="mt-2 text-slate-600">
-            Manage the services offered by each government office.
-          </p>
-        </section>
-
-        {/* Summary */}
-        <section className="mt-8 grid gap-4 sm:grid-cols-3">
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <p className="text-sm text-slate-500">Total Services</p>
-            <p className="mt-2 text-3xl font-bold text-slate-900">6</p>
-          </div>
-
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <p className="text-sm text-slate-500">Active Services</p>
-            <p className="mt-2 text-3xl font-bold text-green-600">6</p>
-          </div>
-
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <p className="text-sm text-slate-500">
-              Average Service Time
-            </p>
-            <p className="mt-2 text-3xl font-bold text-slate-900">
-              10 min
-            </p>
-          </div>
-        </section>
-
-        {/* Services Table */}
-        <section className="mt-8">
-          <h2 className="text-xl font-bold text-slate-900">
-            Available Services
-          </h2>
-
-          <p className="mt-1 text-sm text-slate-500">
-            Services currently configured in QueueLess.
-          </p>
-
-          <div className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[800px] text-left">
-                <thead>
-                  <tr className="border-b border-slate-200 bg-slate-50">
-                    <th className="px-5 py-4 text-sm font-semibold text-slate-600">
-                      Service
-                    </th>
-
-                    <th className="px-5 py-4 text-sm font-semibold text-slate-600">
-                      Office
-                    </th>
-
-                    <th className="px-5 py-4 text-sm font-semibold text-slate-600">
-                      Avg. Time
-                    </th>
-
-                    <th className="px-5 py-4 text-sm font-semibold text-slate-600">
-                      Counters
-                    </th>
-
-                    <th className="px-5 py-4 text-sm font-semibold text-slate-600">
-                      Status
-                    </th>
-
-                    <th className="px-5 py-4 text-sm font-semibold text-slate-600">
-                      Action
-                    </th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {services.map((service) => (
-                    <tr
-                      key={service.id}
-                      className="border-b border-slate-100 last:border-0"
-                    >
-                      <td className="px-5 py-5">
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-50 to-purple-50">
-                            📋
-                          </div>
-
-                          <span className="font-semibold text-slate-900">
-                            {service.name}
-                          </span>
-                        </div>
-                      </td>
-
-                      <td className="px-5 py-5 text-sm text-slate-600">
-                        {service.office}
-                      </td>
-
-                      <td className="px-5 py-5 text-sm font-medium text-slate-700">
-                        {service.averageTime} min
-                      </td>
-
-                      <td className="px-5 py-5 text-sm text-slate-600">
-                        {service.counters}
-                      </td>
-
-                      <td className="px-5 py-5">
-                        <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
-                          {service.status}
-                        </span>
-                      </td>
-
-                      <td className="px-5 py-5">
-                        <button
-                          type="button"
-                          onClick={() => setManageService(service)}
-                          className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-                        >
-                          Manage
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-      </main>
-
-      {/* Manage Service Modal */}
-      {manageService && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4"
-          onClick={() => setManageService(null)}
-        >
-          <div
-            className="w-full max-w-lg rounded-2xl bg-white shadow-2xl"
-            onClick={(event) => event.stopPropagation()}
-          >
-            {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-slate-200 p-6">
-              <div>
-                <h2 className="text-xl font-bold text-slate-900">
-                  Manage Service
-                </h2>
-
-                <p className="mt-1 text-sm text-slate-500">
-                  Update service configuration
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setManageService(null)}
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-xl text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
+        {selectedOffice && (
+          <>
+            <div className="max-w-sm">
+              <label htmlFor="officeSelect" className={labelClass}>
+                Government office
+              </label>
+              <select
+                id="officeSelect"
+                value={officeId}
+                onChange={(e) => setSearchParams({ office: e.target.value })}
+                className={inputClass}
               >
-                ×
-              </button>
+                {offices.map((office) => (
+                  <option key={office._id} value={office._id}>
+                    {office.name}
+                  </option>
+                ))}
+              </select>
             </div>
 
-            {/* Form */}
-            <div className="space-y-5 p-6">
-              {/* Service Name */}
-              <div>
-                <label
-                  htmlFor="serviceName"
-                  className="text-sm font-semibold text-slate-700"
-                >
-                  Service Name
-                </label>
+            <p className="text-sm text-slate-500">
+              Only active services are listed. A deactivated service is hidden from
+              citizens and from this list.
+            </p>
 
+            {servicesLoading && <LoadingBlock label="Loading services..." />}
+            {!servicesLoading && servicesError && (
+              <ErrorBlock message={servicesError} onRetry={loadServices} />
+            )}
+
+            {!servicesLoading && !servicesError && services.length === 0 && (
+              <EmptyState
+                icon="📋"
+                title="No active services"
+                description={`${selectedOffice.name} has no active services yet.`}
+                action={
+                  <button type="button" onClick={openCreate} className={primaryBtn}>
+                    + Add service
+                  </button>
+                }
+              />
+            )}
+
+            {!servicesLoading && !servicesError && services.length > 0 && (
+              <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[720px] text-left">
+                    <thead>
+                      <tr className="border-b border-slate-200 bg-slate-50 text-sm font-semibold text-slate-600">
+                        <th className="px-5 py-4">Service</th>
+                        <th className="px-5 py-4">Office</th>
+                        <th className="px-5 py-4">Avg. service time</th>
+                        <th className="px-5 py-4">Status</th>
+                        <th className="px-5 py-4">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {services.map((service) => (
+                        <tr key={service._id} className="border-b border-slate-100 last:border-0">
+                          <td className="px-5 py-4">
+                            <p className="font-semibold text-slate-900">{service.name}</p>
+                            {service.description && (
+                              <p className="mt-1 max-w-sm text-sm text-slate-500">
+                                {service.description}
+                              </p>
+                            )}
+                          </td>
+                          <td className="px-5 py-4 text-sm text-slate-600">
+                            {selectedOffice.name}
+                          </td>
+                          <td className="px-5 py-4 text-sm font-medium text-slate-700">
+                            {service.averageServiceTime} min
+                          </td>
+                          <td className="px-5 py-4">
+                            <StatusBadge status={service.isActive ? "ACTIVE" : "INACTIVE"} />
+                          </td>
+                          <td className="px-5 py-4">
+                            <div className="flex gap-2">
+                              <button type="button" onClick={() => openEdit(service)} className={smallBtn}>
+                                Edit
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setDeactivateError("");
+                                  setToDeactivate(service);
+                                }}
+                                className={smallDangerBtn}
+                              >
+                                Deactivate
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {formModal && (
+        <Modal
+          title={formModal.mode === "edit" ? "Edit service" : "Add service"}
+          subtitle={selectedOffice?.name}
+          onClose={closeForm}
+        >
+          <form onSubmit={handleSubmit} noValidate>
+            <div className="space-y-5 p-6">
+              {formError && <Alert>{formError}</Alert>}
+
+              <div>
+                <label htmlFor="serviceName" className={labelClass}>Service name</label>
                 <input
                   id="serviceName"
                   type="text"
-                  defaultValue={manageService.name}
-                  className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  disabled={saving}
+                  className={inputClass}
                 />
               </div>
 
-              {/* Office */}
               <div>
-                <label
-                  htmlFor="serviceOffice"
-                  className="text-sm font-semibold text-slate-700"
-                >
-                  Government Office
+                <label htmlFor="serviceDescription" className={labelClass}>
+                  Description <span className="font-normal text-slate-400">(optional)</span>
                 </label>
-
-                <select
-                  id="serviceOffice"
-                  defaultValue={manageService.office}
-                  className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                >
-                  <option value="RTO Office">RTO Office</option>
-                  <option value="Municipal Office">
-                    Municipal Office
-                  </option>
-                </select>
+                <textarea
+                  id="serviceDescription"
+                  rows={3}
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  disabled={saving}
+                  className={inputClass}
+                />
               </div>
 
-              {/* Average Time */}
               <div>
-                <label
-                  htmlFor="averageTime"
-                  className="text-sm font-semibold text-slate-700"
-                >
-                  Average Service Time
-                </label>
-
-                <div className="mt-2 flex">
-                  <input
-                    id="averageTime"
-                    type="number"
-                    min="1"
-                    defaultValue={manageService.averageTime}
-                    className="w-full rounded-l-xl border border-r-0 border-slate-200 px-4 py-3 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  />
-
-                  <span className="flex items-center rounded-r-xl border border-slate-200 bg-slate-50 px-4 text-sm text-slate-500">
-                    min
-                  </span>
-                </div>
-              </div>
-
-              {/* Status */}
-              <div>
-                <label
-                  htmlFor="serviceStatus"
-                  className="text-sm font-semibold text-slate-700"
-                >
-                  Service Status
-                </label>
-
-                <select
-                  id="serviceStatus"
-                  defaultValue={manageService.status}
-                  className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                >
-                  <option value="ACTIVE">Active</option>
-                  <option value="INACTIVE">Inactive</option>
-                </select>
-              </div>
-
-              {/* Counters */}
-              <div className="rounded-xl bg-slate-50 p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-semibold text-slate-700">
-                      Assigned Counters
-                    </p>
-
-                    <p className="mt-1 text-xs text-slate-500">
-                      Counters currently handling this service
-                    </p>
-                  </div>
-
-                  <span className="text-2xl font-bold text-blue-600">
-                    {manageService.counters}
-                  </span>
-                </div>
+                <label htmlFor="serviceTime" className={labelClass}>Average service time (minutes)</label>
+                <input
+                  id="serviceTime"
+                  type="number"
+                  min="1"
+                  step="1"
+                  value={form.averageServiceTime}
+                  onChange={(e) => setForm({ ...form, averageServiceTime: e.target.value })}
+                  disabled={saving}
+                  className={inputClass}
+                />
               </div>
             </div>
 
-            {/* Footer */}
             <div className="flex gap-3 border-t border-slate-200 p-6">
-              <button
-                type="button"
-                onClick={() => setManageService(null)}
-                className="flex-1 rounded-xl border border-slate-200 px-5 py-3 font-semibold text-slate-700 transition hover:bg-slate-50"
-              >
+              <button type="button" onClick={closeForm} disabled={saving} className={`${secondaryBtn} flex-1`}>
                 Cancel
               </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  console.log("Save service changes");
-                  setManageService(null);
-                }}
-                className="flex-1 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-5 py-3 font-semibold text-white transition hover:from-blue-700 hover:to-purple-700"
-              >
-                Save Changes
+              <button type="submit" disabled={saving} className={`${primaryBtn} flex-1`}>
+                {saving ? "Saving..." : formModal.mode === "edit" ? "Save changes" : "Create service"}
               </button>
             </div>
-          </div>
-        </div>
+          </form>
+        </Modal>
       )}
-    </div>
+
+      {toDeactivate && (
+        <ConfirmDialog
+          title="Deactivate service?"
+          message={`"${toDeactivate.name}" will be marked inactive and will no longer be offered to citizens. The service record is kept; it is not permanently deleted.`}
+          confirmLabel="Deactivate"
+          busy={deactivating}
+          error={deactivateError}
+          onConfirm={handleDeactivate}
+          onCancel={() => setToDeactivate(null)}
+        />
+      )}
+    </AdminLayout>
   );
 }

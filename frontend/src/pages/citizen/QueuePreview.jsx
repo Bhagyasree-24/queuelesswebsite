@@ -1,229 +1,232 @@
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import CitizenNavbar from "../../components/citizen/CitizenNavbar";
+import {
+  getQueueInfo,
+  getOfficeById,
+  getOfficeServices,
+  createToken,
+} from "../../services/citizenApi";
 
-export default function QueuePreview() {
+export default function QueuePreview({ user }) {
   const navigate = useNavigate();
   const { officeId, serviceId } = useParams();
 
-  // Temporary data.
-  // Later this will come from:
-  // GET /api/offices/:officeId/services/:serviceId/queue
+  const [office, setOffice] = useState(null);
+  const [service, setService] = useState(null);
+  const [queueTokens, setQueueTokens] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [generating, setGenerating] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null);
 
-  const office = {
-    name: "RTO Office",
-    icon: "🚗",
+  useEffect(() => {
+    async function loadQueuePreview() {
+      try {
+        setLoading(true);
+        setErrorMessage(null);
+
+        const [officeRes, servicesRes, queueRes] = await Promise.all([
+          getOfficeById(officeId),
+          getOfficeServices(officeId),
+          getQueueInfo(officeId, serviceId),
+        ]);
+
+        if (officeRes.success) {
+          setOffice(officeRes.office);
+        }
+
+        if (servicesRes.success) {
+          const selected = servicesRes.services.find(
+            (s) => s._id.toString() === serviceId
+          );
+          setService(selected || null);
+        }
+
+        if (queueRes.success) {
+          setQueueTokens(queueRes.queue || []);
+        } else {
+          setErrorMessage(queueRes.message || "Failed to fetch queue data");
+        }
+      } catch (err) {
+        console.error("Queue preview load error:", err);
+        setErrorMessage("Network error. Could not fetch queue information.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (officeId && serviceId) {
+      loadQueuePreview();
+    }
+  }, [officeId, serviceId]);
+
+  const peopleWaiting = queueTokens.filter(
+    (t) => t.status === "WAITING"
+  ).length;
+
+  const currentServingToken =
+    queueTokens.find(
+      (t) => t.status === "SERVING" || t.status === "CALLED"
+    )?.tokenNumber || "None";
+
+  const avgTime = service?.averageServiceTime || 10;
+  const estimatedWaitTime = Math.max(0, peopleWaiting * avgTime);
+
+  const handleGenerateToken = async () => {
+    try {
+      setGenerating(true);
+      setErrorMessage(null);
+
+      const res = await createToken(officeId, serviceId);
+
+      if (res.success && res.token?._id) {
+        navigate(`/citizen/token/${res.token._id}`);
+      } else {
+        setErrorMessage(res.message || "Failed to generate token.");
+      }
+    } catch (err) {
+      console.error("Token creation error:", err);
+      setErrorMessage("Error connecting to server to generate token.");
+    } finally {
+      setGenerating(false);
+    }
   };
-
-  const service = {
-    name: "Driving License",
-    averageServiceTime: 10,
-  };
-
-  const queue = {
-    peopleWaiting: 8,
-    activeCounters: 3,
-    currentServingToken: "A-16",
-    estimatedWaitTime: 20,
-  };
-
-  const handleGenerateToken = () => {
-    // temporary token creation
-    const tokenId = "demo-token";
-
-    navigate(`/citizen/token/${tokenId}`);
-  };
-
 
   return (
     <div className="min-h-screen bg-slate-50">
+      {/* Citizen Navbar */}
+      <CitizenNavbar user={user} />
 
-      {/* Header */}
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-
-          <button
-            type="button"
-            onClick={() => navigate("/citizen")}
-            className="text-2xl font-bold tracking-tight"
-          >
-            <span className="text-slate-900">Queue</span>
-            <span className="text-blue-600">Less</span>
-          </button>
-
-          <button
-            type="button"
-            className="flex items-center gap-2 rounded-xl px-2 py-2 transition hover:bg-slate-100 sm:gap-3 sm:px-3"
-          >
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-blue-100 to-purple-100 font-semibold text-blue-600">
-              N
-            </div>
-
-            <div className="hidden text-left sm:block">
-              <p className="text-sm font-semibold text-slate-900">
-                Nithin Kumar
-              </p>
-
-              <p className="text-xs text-slate-500">
-                Citizen
-              </p>
-            </div>
-          </button>
-
-        </div>
-      </header>
-
-      {/* Main */}
+      {/* Main Content */}
       <main className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
-
         {/* Back */}
         <button
           type="button"
-          onClick={() =>
-            navigate(`/citizen/offices/${officeId}/services`)
-          }
+          onClick={() => navigate(`/citizen/offices/${officeId}/services`)}
           className="mb-8 text-sm font-semibold text-slate-500 transition hover:text-blue-600"
         >
           ← Back to services
         </button>
 
-        {/* Heading */}
-        <div className="text-center">
-
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-100 to-purple-100 text-3xl">
-            {office.icon}
-          </div>
-
-          <p className="mt-5 text-sm font-semibold uppercase tracking-wide text-blue-600">
-            {office.name}
-          </p>
-
-          <h1 className="mt-2 text-3xl font-bold text-slate-900 sm:text-4xl">
-            {service.name}
-          </h1>
-
-          <p className="mt-3 text-slate-600">
-            Check the current queue before taking your virtual token.
-          </p>
-
-        </div>
-
-        {/* Queue Card */}
-        <div className="mx-auto mt-10 max-w-3xl rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-
-          {/* Live status */}
-          <div className="flex items-center justify-between">
-
-            <div>
-              <p className="text-sm text-slate-500">
-                Current queue
-              </p>
-
-              <p className="mt-1 text-lg font-bold text-slate-900">
-                {queue.peopleWaiting} people waiting
-              </p>
-            </div>
-
-            <span className="flex items-center gap-2 rounded-full bg-green-100 px-3 py-1.5 text-sm font-semibold text-green-700">
-              <span className="h-2 w-2 rounded-full bg-green-500" />
-              Live
-            </span>
-
-          </div>
-
-          {/* Main wait time */}
-          <div className="mt-8 rounded-2xl bg-gradient-to-br from-blue-50 to-purple-50 p-6 text-center">
-
-            <p className="text-sm font-medium text-slate-500">
-              Estimated waiting time
+        {loading ? (
+          <div className="mt-10 rounded-3xl border border-slate-200 bg-white p-12 text-center shadow-sm">
+            <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+            <p className="mt-4 text-slate-600">
+              Loading current queue information...
             </p>
-
-            <p className="mt-2 text-5xl font-bold text-slate-900">
-              {queue.estimatedWaitTime}
-              <span className="ml-2 text-xl font-semibold text-slate-500">
-                min
-              </span>
-            </p>
-
-            <p className="mt-2 text-sm text-slate-500">
-              Approximate time based on current queue activity
-            </p>
-
           </div>
+        ) : (
+          <>
+            {/* Heading */}
+            <div className="text-center">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-100 to-purple-100 text-3xl">
+                🏛️
+              </div>
 
-          {/* Queue information */}
-          <div className="mt-6 grid gap-4 sm:grid-cols-3">
-
-            <div className="rounded-2xl bg-slate-50 p-5">
-              <p className="text-sm text-slate-500">
-                People waiting
+              <p className="mt-5 text-sm font-semibold uppercase tracking-wide text-blue-600">
+                {office?.name || "Government Office"}
               </p>
 
-              <p className="mt-1 text-2xl font-bold text-slate-900">
-                {queue.peopleWaiting}
-              </p>
-            </div>
+              <h1 className="mt-2 text-3xl font-bold text-slate-900 sm:text-4xl">
+                {service?.name || "Service Queue"}
+              </h1>
 
-            <div className="rounded-2xl bg-slate-50 p-5">
-              <p className="text-sm text-slate-500">
-                Active counters
-              </p>
-
-              <p className="mt-1 text-2xl font-bold text-slate-900">
-                {queue.activeCounters}
+              <p className="mt-3 text-slate-600">
+                Check the current queue before taking your virtual token.
               </p>
             </div>
 
-            <div className="rounded-2xl bg-slate-50 p-5">
-              <p className="text-sm text-slate-500">
-                Currently serving
-              </p>
+            {/* Error banner */}
+            {errorMessage && (
+              <div className="mx-auto mt-6 max-w-3xl rounded-2xl border border-red-200 bg-red-50 p-4 text-center text-sm font-semibold text-red-700">
+                {errorMessage}
+              </div>
+            )}
 
-              <p className="mt-1 text-2xl font-bold text-slate-900">
-                {queue.currentServingToken}
+            {/* Queue Card */}
+            <div className="mx-auto mt-8 max-w-3xl rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+              {/* Live status */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-slate-500">Current queue</p>
+                  <p className="mt-1 text-lg font-bold text-slate-900">
+                    {peopleWaiting} {peopleWaiting === 1 ? "person" : "people"}{" "}
+                    waiting
+                  </p>
+                </div>
+
+                <span className="flex items-center gap-2 rounded-full bg-green-100 px-3 py-1.5 text-sm font-semibold text-green-700">
+                  <span className="h-2 w-2 rounded-full bg-green-500" />
+                  Live
+                </span>
+              </div>
+
+              {/* Main wait time */}
+              <div className="mt-8 rounded-2xl bg-gradient-to-br from-blue-50 to-purple-50 p-6 text-center">
+                <p className="text-sm font-medium text-slate-500">
+                  Estimated waiting time
+                </p>
+
+                <p className="mt-2 text-5xl font-bold text-slate-900">
+                  {estimatedWaitTime}
+                  <span className="ml-2 text-xl font-semibold text-slate-500">
+                    min
+                  </span>
+                </p>
+
+                <p className="mt-2 text-sm text-slate-500">
+                  Approximate wait time calculated for new tokens
+                </p>
+              </div>
+
+              {/* Queue information */}
+              <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                <div className="rounded-2xl bg-slate-50 p-5 text-center">
+                  <p className="text-sm text-slate-500">People waiting</p>
+                  <p className="mt-1 text-3xl font-bold text-slate-900">
+                    {peopleWaiting}
+                  </p>
+                </div>
+
+                <div className="rounded-2xl bg-slate-50 p-5 text-center">
+                  <p className="text-sm text-slate-500">Currently serving</p>
+                  <p className="mt-1 text-3xl font-bold text-slate-900">
+                    {currentServingToken}
+                  </p>
+                </div>
+              </div>
+
+              {/* Service information */}
+              <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-6">
+                <div>
+                  <p className="text-sm text-slate-500">Average service time</p>
+                  <p className="mt-1 font-semibold text-slate-900">
+                    {avgTime} minutes per token
+                  </p>
+                </div>
+
+                <div className="text-right">
+                  <p className="text-sm text-slate-500">Queue status</p>
+                  <p className="mt-1 font-semibold text-green-600">Active</p>
+                </div>
+              </div>
+
+              {/* Get Token Button */}
+              <button
+                type="button"
+                onClick={handleGenerateToken}
+                disabled={generating}
+                className="mt-8 w-full rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4 font-semibold text-white shadow-lg shadow-blue-200 transition hover:-translate-y-0.5 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {generating ? "Generating Token..." : "Get Virtual Token"}
+              </button>
+
+              <p className="mt-3 text-center text-xs text-slate-500">
+                You can track your real-time position after joining the queue.
               </p>
             </div>
-
-          </div>
-
-          {/* Service information */}
-          <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-6">
-
-            <div>
-              <p className="text-sm text-slate-500">
-                Average service time
-              </p>
-
-              <p className="mt-1 font-semibold text-slate-900">
-                {service.averageServiceTime} minutes
-              </p>
-            </div>
-
-            <div className="text-right">
-              <p className="text-sm text-slate-500">
-                Queue status
-              </p>
-
-              <p className="mt-1 font-semibold text-green-600">
-                Moving normally
-              </p>
-            </div>
-
-          </div>
-
-          {/* Get Token */}
-          <button
-            type="button"
-            onClick={handleGenerateToken}
-            className="mt-8 w-full rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4 font-semibold text-white shadow-lg shadow-blue-200 transition hover:-translate-y-0.5 hover:shadow-xl"
-          >
-            Get Virtual Token
-          </button>
-
-          <p className="mt-3 text-center text-xs text-slate-500">
-            You can track your position after joining the queue.
-          </p>
-
-        </div>
-
+          </>
+        )}
       </main>
     </div>
   );

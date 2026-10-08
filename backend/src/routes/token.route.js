@@ -9,6 +9,8 @@ const {
   getTokenById,
   cancelToken
 } = require('../controllers/token.controller');
+const validate = require('../middleware/validate');
+const { createTokenSchema } = require('../schemas/token.schema');
 
 const router = express.Router();
 
@@ -16,7 +18,7 @@ const router = express.Router();
 router.use(requireAuth);
 
 router.get('/offices/:officeId/services/:serviceId/queue', wrapAsync(getQueue));
-router.post('/tokens', wrapAsync(createToken));
+router.post('/tokens',validate(createTokenSchema), wrapAsync(createToken));
 router.get('/tokens/my-active', wrapAsync(getMyActiveToken));
 router.get('/tokens/:tokenId', wrapAsync(getTokenById));
 router.patch('/tokens/:tokenId/cancel', wrapAsync(cancelToken));

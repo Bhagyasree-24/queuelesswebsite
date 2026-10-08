@@ -1,175 +1,63 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import CitizenNavbar from "../../components/citizen/CitizenNavbar";
+import { getOffices, getMyActiveToken } from "../../services/citizenApi";
 
-export default function CitizenHome() {
+export default function CitizenHome({ user }) {
   const navigate = useNavigate();
 
-  const [showAccount, setShowAccount] = useState(false);
+  const [offices, setOffices] = useState([]);
+  const [loadingOffices, setLoadingOffices] = useState(true);
+  const [officesError, setOfficesError] = useState(null);
 
-  const offices = [
-    {
-      id: "rto-office",
-      name: "RTO Office",
-      description: "Transport and vehicle related services",
-      icon: "🚗",
-    },
-    {
-      id: "municipal-office",
-      name: "Municipal Office",
-      description: "Municipal and civic services",
-      icon: "🏛️",
-    },
-  ];
+  const [activeTokenData, setActiveTokenData] = useState(null);
+  const [loadingToken, setLoadingToken] = useState(true);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        setLoadingOffices(true);
+        setLoadingToken(true);
+
+        const [officesRes, activeTokenRes] = await Promise.all([
+          getOffices(),
+          getMyActiveToken(),
+        ]);
+
+        if (officesRes.success) {
+          setOffices(officesRes.offices || []);
+        } else {
+          setOfficesError(officesRes.message || "Failed to load offices");
+        }
+
+        if (activeTokenRes.success && activeTokenRes.token) {
+          setActiveTokenData(activeTokenRes);
+        } else {
+          setActiveTokenData(null);
+        }
+      } catch (error) {
+        console.error("Failed to load home data:", error);
+        setOfficesError("Network error. Could not connect to server.");
+      } finally {
+        setLoadingOffices(false);
+        setLoadingToken(false);
+      }
+    }
+
+    loadData();
+  }, []);
+
+  const activeToken = activeTokenData?.token;
+  const queuePosition = activeTokenData?.queuePosition;
+  const estimatedWait = activeTokenData?.estimatedWaitTimeMinutes;
 
   return (
     <div className="min-h-screen bg-slate-50">
-
-      {/* Header */}
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-
-          {/* Logo */}
-          <button
-            type="button"
-            onClick={() => navigate("/citizen")}
-            className="text-2xl font-bold tracking-tight"
-          >
-            <span className="text-slate-900">Queue</span>
-            <span className="text-blue-600">Less</span>
-          </button>
-
-          {/* Account Button */}
-          <button
-            type="button"
-            onClick={() => setShowAccount(true)}
-            className="flex items-center gap-2 rounded-xl px-2 py-2 transition hover:bg-slate-100 sm:gap-3 sm:px-3"
-          >
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-blue-100 to-purple-100 font-semibold text-blue-600">
-              N
-            </div>
-
-            <div className="hidden text-left sm:block">
-              <p className="text-sm font-semibold text-slate-900">
-                Nithin Kumar
-              </p>
-
-              <p className="text-xs text-slate-500">
-                Citizen
-              </p>
-            </div>
-
-            <span className="text-xs text-slate-400">
-              ▼
-            </span>
-          </button>
-        </div>
-      </header>
-
-      {/* Account Sliding Window */}
-      <div
-        className={`fixed inset-0 z-50 transition-all duration-300 ${
-          showAccount
-            ? "visible bg-slate-900/30"
-            : "invisible bg-transparent"
-        }`}
-        onClick={() => setShowAccount(false)}
-      >
-
-        {/* Sliding Panel */}
-        <aside
-          onClick={(event) => event.stopPropagation()}
-          className={`absolute right-0 top-0 flex h-full w-full max-w-sm flex-col bg-white shadow-2xl transition-transform duration-300 ease-out ${
-            showAccount
-              ? "translate-x-0"
-              : "translate-x-full"
-          }`}
-        >
-
-          {/* Panel Header */}
-          <div className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200 px-5">
-
-            <h2 className="text-lg font-bold text-slate-900">
-              Account
-            </h2>
-
-            <button
-              type="button"
-              onClick={() => setShowAccount(false)}
-              className="flex h-9 w-9 items-center justify-center rounded-lg text-xl text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
-            >
-              ×
-            </button>
-
-          </div>
-
-          {/* Panel Content */}
-          <div className="flex-1 overflow-y-auto p-5">
-
-            {/* User Card */}
-            <div className="rounded-2xl bg-gradient-to-br from-blue-50 to-purple-50 p-5">
-
-              <div className="flex items-center gap-4">
-
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-100 to-purple-100 text-lg font-bold text-blue-600">
-                  N
-                </div>
-
-                <div className="min-w-0">
-                  <h3 className="truncate text-lg font-bold text-slate-900">
-                    Nithin Kumar
-                  </h3>
-
-                  <p className="truncate text-sm text-slate-500">
-                    citizen@example.com
-                  </p>
-                </div>
-
-              </div>
-
-              <span className="mt-4 inline-block rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-600">
-                Citizen
-              </span>
-
-            </div>
-
-            {/* Account Options */}
-            <div className="mt-6">
-
-              <button
-                type="button"
-                className="flex w-full items-center rounded-xl px-4 py-3 text-left font-medium text-slate-700 transition hover:bg-slate-100"
-              >
-                <span className="mr-3 text-lg">
-                  👤
-                </span>
-
-                My Account
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  console.log("Logout");
-                }}
-                className="mt-1 flex w-full items-center rounded-xl px-4 py-3 text-left font-medium text-red-600 transition hover:bg-red-50"
-              >
-                <span className="mr-3 text-lg">
-                  ↪
-                </span>
-
-                Logout
-              </button>
-
-            </div>
-
-          </div>
-
-        </aside>
-      </div>
+      {/* Citizen Navbar */}
+      <CitizenNavbar user={user} />
 
       {/* Main Content */}
       <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-
         {/* Welcome */}
         <section>
           <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">
@@ -181,89 +69,175 @@ export default function CitizenHome() {
           </h1>
 
           <p className="mt-3 max-w-2xl text-slate-600">
-            Choose a government office to view its available services and
-            join the virtual queue.
+            Choose a government office to view its available services and join
+            the virtual queue.
           </p>
         </section>
 
         {/* Government Offices */}
         <section className="mt-10">
-
           <h2 className="text-xl font-bold text-slate-900">
             Government Offices
           </h2>
 
-          <div className="mt-5 grid gap-5 md:grid-cols-2">
+          {/* Error state */}
+          {officesError && (
+            <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-6 text-center text-red-700">
+              <p className="font-semibold">{officesError}</p>
+            </div>
+          )}
 
-            {offices.map((office) => (
-              <button
-                key={office.id}
-                type="button"
-                onClick={() =>
-                  navigate(`/citizen/offices/${office.id}/services`)
-                }
-                className="group rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm transition hover:-translate-y-1 hover:border-blue-200 hover:shadow-lg"
-              >
+          {/* Loading */}
+          {loadingOffices && !officesError && (
+            <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-10 text-center">
+              <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+              <p className="mt-3 text-sm text-slate-500">
+                Loading government offices...
+              </p>
+            </div>
+          )}
 
-                <div className="flex items-start justify-between">
-
-                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-100 to-purple-100 text-2xl">
-                    {office.icon}
-                  </div>
-
-                  <span className="text-xl text-slate-400 transition group-hover:translate-x-1 group-hover:text-blue-600">
-                    →
-                  </span>
-
-                </div>
-
-                <h3 className="mt-6 text-xl font-bold text-slate-900">
-                  {office.name}
-                </h3>
-
-                <p className="mt-2 text-sm leading-6 text-slate-600">
-                  {office.description}
-                </p>
-
-                <p className="mt-5 text-sm font-semibold text-blue-600">
-                  View services →
-                </p>
-
-              </button>
-            ))}
-
-          </div>
-        </section>
-
-        {/* Active Token */}
-        <section className="mt-12">
-
-          <h2 className="text-xl font-bold text-slate-900">
-            Your active token
-          </h2>
-
-          <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-6">
-
-            <div className="py-6 text-center">
-
+          {/* Empty */}
+          {!loadingOffices && !officesError && offices.length === 0 && (
+            <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-10 text-center">
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-2xl">
-                🎟️
+                🏢
               </div>
 
               <h3 className="mt-4 font-semibold text-slate-900">
-                No active token
+                No offices available
               </h3>
 
               <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">
-                Choose an office and service to get a virtual token and
-                track your place in the queue.
+                There are currently no government offices available.
               </p>
-
             </div>
+          )}
 
-          </div>
+          {/* Offices List */}
+          {!loadingOffices && !officesError && offices.length > 0 && (
+            <div className="mt-5 grid gap-5 md:grid-cols-2">
+              {offices.map((office) => (
+                <button
+                  key={office._id}
+                  type="button"
+                  onClick={() =>
+                    navigate(`/citizen/offices/${office._id}/services`)
+                  }
+                  className="group rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm transition hover:-translate-y-1 hover:border-blue-200 hover:shadow-lg"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-100 to-purple-100 text-2xl">
+                      {office.type === "REVENUE" ? "🏛️" : "🏢"}
+                    </div>
+
+                    <span className="text-xl text-slate-400 transition group-hover:translate-x-1 group-hover:text-blue-600">
+                      →
+                    </span>
+                  </div>
+
+                  <h3 className="mt-6 text-xl font-bold text-slate-900">
+                    {office.name}
+                  </h3>
+
+                  {office.description && (
+                    <p className="mt-2 text-sm leading-6 text-slate-600">
+                      {office.description}
+                    </p>
+                  )}
+
+                  {(office.mandal || office.district || office.state) && (
+                    <p className="mt-3 text-xs text-slate-500">
+                      {[office.mandal, office.district, office.state]
+                        .filter(Boolean)
+                        .join(", ")}
+                    </p>
+                  )}
+
+                  <p className="mt-5 text-sm font-semibold text-blue-600">
+                    View services →
+                  </p>
+                </button>
+              ))}
+            </div>
+          )}
         </section>
 
+        {/* Active Token Section */}
+        <section className="mt-12">
+          <h2 className="text-xl font-bold text-slate-900">Your active token</h2>
+
+          {loadingToken ? (
+            <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-8 text-center">
+              <div className="mx-auto h-6 w-6 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+              <p className="mt-2 text-xs text-slate-500">
+                Checking active tokens...
+              </p>
+            </div>
+          ) : activeToken ? (
+            <div className="mt-5 overflow-hidden rounded-2xl border border-blue-200 bg-white shadow-sm transition hover:shadow-md">
+              <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white sm:flex sm:items-center sm:justify-between">
+                <div>
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-xs font-semibold backdrop-blur">
+                    <span className="h-2 w-2 rounded-full bg-green-400" />
+                    Status: {activeToken.status}
+                  </span>
+
+                  <h3 className="mt-3 text-3xl font-bold tracking-tight">
+                    Token #{activeToken.tokenNumber}
+                  </h3>
+
+                  <p className="mt-1 text-sm text-blue-100">
+                    {activeToken.officeId?.name} · {activeToken.serviceId?.name}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => navigate(`/citizen/token/${activeToken._id}`)}
+                  className="mt-4 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-blue-600 shadow transition hover:bg-blue-50 sm:mt-0"
+                >
+                  View Token Details
+                </button>
+              </div>
+
+              <div className="grid gap-4 p-6 sm:grid-cols-2">
+                <div className="rounded-xl bg-slate-50 p-4">
+                  <p className="text-xs text-slate-500">Queue Position</p>
+                  <p className="mt-1 text-2xl font-bold text-slate-900">
+                    {queuePosition ? `#${queuePosition}` : "In Progress"}
+                  </p>
+                </div>
+
+                <div className="rounded-xl bg-slate-50 p-4">
+                  <p className="text-xs text-slate-500">Estimated Wait</p>
+                  <p className="mt-1 text-2xl font-bold text-slate-900">
+                    {estimatedWait !== null && estimatedWait !== undefined
+                      ? `${estimatedWait} min`
+                      : "N/A"}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-6">
+              <div className="py-6 text-center">
+                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-2xl">
+                  🎟️
+                </div>
+
+                <h3 className="mt-4 font-semibold text-slate-900">
+                  No active token
+                </h3>
+
+                <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">
+                  Choose an office and service to get a virtual token and track
+                  your place in the queue.
+                </p>
+              </div>
+            </div>
+          )}
+        </section>
       </main>
     </div>
   );
