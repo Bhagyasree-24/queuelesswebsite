@@ -25,6 +25,13 @@ const serviceSchema = new Schema({
         min: 1
     },
 
+    requiredDocuments: {
+        type: [String],
+        default: [],
+        set: (documents) =>
+            documents.map((document) => document.trim()).filter(Boolean)
+    },
+
     isActive: {
         type: Boolean,
         required: true,

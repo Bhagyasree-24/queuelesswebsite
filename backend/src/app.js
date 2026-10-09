@@ -61,8 +61,9 @@ const sessionOptions = {
         httpOnly: true
     }
 };
+const sessionMiddleware = session(sessionOptions);
 
-app.use(session(sessionOptions));
+app.use(sessionMiddleware);
 
 // PASSPORT
 
@@ -91,5 +92,7 @@ app.use(notFound);
 app.use(errorHandler);
 
 // EXPORT
+app.set('sessionMiddleware', sessionMiddleware);
+app.set('passport', passport);
 
 module.exports = app;

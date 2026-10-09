@@ -55,7 +55,7 @@ export default function Login() {
           navigate("/operator", { replace: true });
         } else if (role === "admin") {
           console.log("redirecting to admin");
-          navigate("/operator", { replace: true });
+          navigate("/admin", { replace: true });
         }else {
           setError("Unknown user role");
         }
