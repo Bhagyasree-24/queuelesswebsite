@@ -5,11 +5,19 @@ const Office = require('../models/Office');
 const Service = require('../models/Service');
 const Counter = require("../models/Counter");
 const ExpressError = require('../utils/ExpressError');
+const {
+  getTodayBounds,
+  getTokenAvailability,
+  expirePreviousDayUnservedTokens,
+  checkQueueCanFinishBeforeClosing
+} = require('../utils/officeSchedule');
 
 const ACTIVE_STATUSES = ['WAITING', 'CALLED', 'SERVING'];
 
 // 1. GET /api/offices/:officeId/services/:serviceId/queue
 const getQueue = async (req, res) => {
+  await expirePreviousDayUnservedTokens();
+  const { start, end } = getTodayBounds();
   const { officeId, serviceId } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(officeId)) {
@@ -32,7 +40,8 @@ const getQueue = async (req, res) => {
   const activeTokens = await Token.find({
     officeId,
     serviceId,
-    status: { $in: ACTIVE_STATUSES }
+    status: { $in: ACTIVE_STATUSES },
+    createdAt: { $gte: start, $lt: end }
   })
     .sort({ createdAt: 1 })
     .select('tokenNumber status createdAt calledAt startedAt');
@@ -55,6 +64,8 @@ const getQueue = async (req, res) => {
 
 // 2. POST /api/tokens - Generate token
 const createToken = async (req, res) => {
+  await expirePreviousDayUnservedTokens();
+  const now = new Date();
   const { officeId, serviceId } = req.body;
 
   if (!officeId || !mongoose.Types.ObjectId.isValid(officeId)) {
@@ -67,6 +78,11 @@ const createToken = async (req, res) => {
   const office = await Office.findById(officeId);
   if (!office) {
     throw new ExpressError(404, 'Office not found');
+  }
+
+  const availability = getTokenAvailability(office, now);
+  if (!availability.allowed) {
+    throw new ExpressError(400, availability.message);
   }
 
   const service = await Service.findById(serviceId);
@@ -89,6 +105,11 @@ const createToken = async (req, res) => {
       409,
       'You already have an active token in the queue'
     );
+  }
+
+  const capacity = await checkQueueCanFinishBeforeClosing({ office, service, now });
+  if (!capacity.allowed) {
+    throw new ExpressError(400, capacity.message);
   }
 
   // Generate hackathon-friendly token sequence (T001, T002, ...)
@@ -115,9 +136,15 @@ const createToken = async (req, res) => {
 
 // 3. GET /api/tokens/my-active - Get user's current active token
 const getMyActiveToken = async (req, res) => {
+  await expirePreviousDayUnservedTokens();
+  const { start, end } = getTodayBounds();
   const activeToken = await Token.findOne({
     userId: req.user._id,
-    status: { $in: ACTIVE_STATUSES }
+    status: { $in: ACTIVE_STATUSES },
+    $or: [
+      { createdAt: { $gte: start, $lt: end } },
+      { status: 'SERVING' }
+    ]
   })
     .populate('officeId', 'name code type')
     .populate('serviceId', 'name averageServiceTime');
@@ -134,9 +161,10 @@ const getMyActiveToken = async (req, res) => {
 
   if (activeToken.status === 'WAITING') {
     const tokensAhead = await Token.countDocuments({
+      officeId: activeToken.officeId._id,
       serviceId: activeToken.serviceId._id,
       status: { $in: ACTIVE_STATUSES },
-      createdAt: { $lte: activeToken.createdAt }
+      createdAt: { $gte: start, $lt: end, $lte: activeToken.createdAt }
     });
 
     queuePosition = tokensAhead;
@@ -154,6 +182,8 @@ const getMyActiveToken = async (req, res) => {
 
 // 4. GET /api/tokens/:tokenId - View single token details
 const getTokenById = async (req, res) => {
+  await expirePreviousDayUnservedTokens();
+  const { start, end } = getTodayBounds();
   const { tokenId } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(tokenId)) {
@@ -182,9 +212,10 @@ const getTokenById = async (req, res) => {
 
   if (token.status === 'WAITING') {
     const tokensAhead = await Token.countDocuments({
+      officeId: token.officeId._id,
       serviceId: token.serviceId._id,
       status: { $in: ACTIVE_STATUSES },
-      createdAt: { $lte: token.createdAt }
+      createdAt: { $gte: start, $lt: end, $lte: token.createdAt }
     });
 
     queuePosition = tokensAhead;

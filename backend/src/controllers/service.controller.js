@@ -1,3 +1,4 @@
+
 const mongoose = require('mongoose');
 
 const Office = require('../models/Office');
@@ -7,7 +8,14 @@ const ExpressError = require('../utils/ExpressError');
 // POST /api/admin/offices/:officeId/services - Create service
 const createService = async (req, res) => {
   const { officeId } = req.params;
-  const { name, description, averageServiceTime, isActive } = req.body;
+
+  const {
+    name,
+    description,
+    averageServiceTime,
+    isActive,
+    requiredDocuments = []
+  } = req.body;
 
   if (!mongoose.Types.ObjectId.isValid(officeId)) {
     throw new ExpressError(400, 'Invalid office ID format');
@@ -36,6 +44,7 @@ const createService = async (req, res) => {
     name: name.trim(),
     description: description ? description.trim() : undefined,
     averageServiceTime: parsedTime,
+    requiredDocuments,
     isActive: isActive !== undefined ? Boolean(isActive) : true
   });
 
@@ -51,7 +60,14 @@ const createService = async (req, res) => {
 // PUT /api/admin/services/:serviceId - Update service
 const updateService = async (req, res) => {
   const { serviceId } = req.params;
-  const { name, description, averageServiceTime, isActive } = req.body;
+
+  const {
+    name,
+    description,
+    averageServiceTime,
+    isActive,
+    requiredDocuments
+  } = req.body;
 
   if (!mongoose.Types.ObjectId.isValid(serviceId)) {
     throw new ExpressError(400, 'Invalid service ID format');
@@ -83,6 +99,10 @@ const updateService = async (req, res) => {
 
   if (isActive !== undefined) {
     service.isActive = Boolean(isActive);
+  }
+
+  if (requiredDocuments !== undefined) {
+    service.requiredDocuments = requiredDocuments;
   }
 
   await service.save();
