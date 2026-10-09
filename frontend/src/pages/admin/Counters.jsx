@@ -150,7 +150,6 @@ export default function Counters({ user, setUser }) {
       setNotice(result.message || "Counter deleted.");
       await loadCounters();
     } catch (err) {
-      // e.g. 409 when the counter has a CALLED/SERVING token
       setDeleteError(err.message);
     } finally {
       setDeleting(false);
@@ -159,121 +158,146 @@ export default function Counters({ user, setUser }) {
 
   return (
     <AdminLayout user={user} setUser={setUser}>
-      <PageHeader
-        title="Counters"
-        description="Create and manage the service counters of each office."
-        action={
-          selectedOffice && (
-            <button type="button" onClick={openCreate} className={primaryBtn}>
-              + Add counter
-            </button>
-          )
-        }
-      />
+      <div className="relative min-h-screen -m-6 p-6 lg:p-8">
+        {/* Background image overlay matching reference aesthetic */}
+        <div 
+          className="absolute inset-0 z-0 bg-cover bg-center bg-fixed pointer-events-none opacity-25"
+          style={{ backgroundImage: `url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=2000&q=80')` }}
+        />
+        <div className="absolute inset-0 z-0 bg-gradient-to-br from-slate-950/70 via-slate-900/60 to-teal-950/70 backdrop-blur-[2px] pointer-events-none" />
 
-      <div className="mt-8 space-y-6">
-        {notice && (
-          <Alert type="success" onClose={() => setNotice("")}>
-            {notice}
-          </Alert>
-        )}
-
-        {officesLoading && <LoadingBlock label="Loading offices..." />}
-        {!officesLoading && officesError && (
-          <ErrorBlock message={officesError} onRetry={loadOffices} />
-        )}
-        {!officesLoading && !officesError && offices.length === 0 && (
-          <EmptyState icon="🏛️" title="No offices found" description="Counters belong to an office, and none were returned by the backend." />
-        )}
-
-        {selectedOffice && (
-          <>
-            <div className="max-w-sm">
-              <label htmlFor="officeSelect" className={labelClass}>
-                Government office
-              </label>
-              <select
-                id="officeSelect"
-                value={officeId}
-                onChange={(e) => setSearchParams({ office: e.target.value })}
-                className={inputClass}
-              >
-                {offices.map((office) => (
-                  <option key={office._id} value={office._id}>
-                    {office.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {countersLoading && <LoadingBlock label="Loading counters..." />}
-            {!countersLoading && countersError && (
-              <ErrorBlock message={countersError} onRetry={loadCounters} />
-            )}
-
-            {!countersLoading && !countersError && counters.length === 0 && (
-              <EmptyState
-                icon="🖥️"
-                title="No counters yet"
-                description={`${selectedOffice.name} has no counters. Create one to get started.`}
-                action={
-                  <button type="button" onClick={openCreate} className={primaryBtn}>
+        <div className="relative z-10 space-y-6">
+          <div className="bg-white/70 backdrop-blur-xl border border-white/40 shadow-xl rounded-3xl p-6 lg:p-8">
+            <PageHeader
+              title="Counters"
+              description="Create and manage the service counters of each office."
+              action={
+                selectedOffice && (
+                  <button type="button" onClick={openCreate} className={`${primaryBtn} shadow-lg shadow-teal-600/20`}>
                     + Add counter
                   </button>
-                }
-              />
+                )
+              }
+            />
+          </div>
+
+          <div className="space-y-6">
+            {notice && (
+              <Alert type="success" onClose={() => setNotice("")}>
+                {notice}
+              </Alert>
             )}
 
-            {!countersLoading && !countersError && counters.length > 0 && (
-              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                {counters.map((counter) => (
-                  <article
-                    key={counter._id}
-                    className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                          Counter #{counter.number}
-                        </p>
-                        <h3 className="mt-1 text-lg font-bold text-slate-900">{counter.name}</h3>
-                      </div>
-                      <StatusBadge status={counter.status} />
-                    </div>
-
-                    <div className="mt-4 rounded-xl bg-slate-50 p-3 text-sm">
-                      <p className="text-slate-500">Current token</p>
-                      {counter.currentTokenId ? (
-                        <p className="mt-1 flex items-center gap-2 font-semibold text-slate-900">
-                          {counter.currentTokenId.tokenNumber}
-                          <StatusBadge status={counter.currentTokenId.status} />
-                        </p>
-                      ) : (
-                        <p className="mt-1 text-slate-400">None</p>
-                      )}
-                    </div>
-
-                    <div className="mt-4 flex gap-2">
-                      <button type="button" onClick={() => openEdit(counter)} className={smallBtn}>
-                        Edit
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setDeleteError("");
-                          setToDelete(counter);
-                        }}
-                        className={smallDangerBtn}
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </article>
-                ))}
+            {officesLoading && (
+              <div className="bg-white/70 backdrop-blur-xl border border-white/40 rounded-3xl p-12 shadow-xl">
+                <LoadingBlock label="Loading offices..." />
               </div>
             )}
-          </>
-        )}
+            {!officesLoading && officesError && (
+              <div className="bg-white/70 backdrop-blur-xl border border-white/40 rounded-3xl p-12 shadow-xl">
+                <ErrorBlock message={officesError} onRetry={loadOffices} />
+              </div>
+            )}
+            {!officesLoading && !officesError && offices.length === 0 && (
+              <div className="bg-white/70 backdrop-blur-xl border border-white/40 rounded-3xl p-12 shadow-xl">
+                <EmptyState icon="🏛️" title="No offices found" description="Counters belong to an office, and none were returned by the backend." />
+              </div>
+            )}
+
+            {selectedOffice && (
+              <>
+                <div className="rounded-3xl border border-white/40 bg-white/75 backdrop-blur-xl p-6 lg:p-8 shadow-2xl">
+                  <div className="max-w-sm">
+                    <label htmlFor="officeSelect" className={labelClass}>
+                      Government office
+                    </label>
+                    <select
+                      id="officeSelect"
+                      value={officeId}
+                      onChange={(e) => setSearchParams({ office: e.target.value })}
+                      className={`${inputClass} backdrop-blur-md bg-white/80 border-slate-200/80 focus:bg-white transition-all`}
+                    >
+                      {offices.map((office) => (
+                        <option key={office._id} value={office._id}>
+                          {office.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="mt-6">
+                    {countersLoading && <LoadingBlock label="Loading counters..." />}
+                    {!countersLoading && countersError && (
+                      <ErrorBlock message={countersError} onRetry={loadCounters} />
+                    )}
+
+                    {!countersLoading && !countersError && counters.length === 0 && (
+                      <EmptyState
+                        icon="🖥️"
+                        title="No counters yet"
+                        description={`${selectedOffice.name} has no counters. Create one to get started.`}
+                        action={
+                          <button type="button" onClick={openCreate} className={primaryBtn}>
+                            + Add counter
+                          </button>
+                        }
+                      />
+                    )}
+
+                    {!countersLoading && !countersError && counters.length > 0 && (
+                      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                        {counters.map((counter) => (
+                          <article
+                            key={counter._id}
+                            className="rounded-2xl border border-slate-200/60 bg-white/60 backdrop-blur-md p-5 shadow-sm transition-all hover:bg-white/80 hover:shadow-md"
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div>
+                                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                                  Counter #{counter.number}
+                                </p>
+                                <h3 className="mt-1 text-lg font-bold text-slate-900">{counter.name}</h3>
+                              </div>
+                              <StatusBadge status={counter.status} />
+                            </div>
+
+                            <div className="mt-4 rounded-xl bg-white/50 border border-slate-200/50 p-3 text-sm">
+                              <p className="text-slate-500 font-medium">Current token</p>
+                              {counter.currentTokenId ? (
+                                <p className="mt-1 flex items-center gap-2 font-semibold text-slate-900">
+                                  {counter.currentTokenId.tokenNumber}
+                                  <StatusBadge status={counter.currentTokenId.status} />
+                                </p>
+                              ) : (
+                                <p className="mt-1 text-slate-400 font-medium">None</p>
+                              )}
+                            </div>
+
+                            <div className="mt-4 flex gap-2">
+                              <button type="button" onClick={() => openEdit(counter)} className={`${smallBtn} bg-white/80 hover:bg-white`}>
+                                Edit
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setDeleteError("");
+                                  setToDelete(counter);
+                                }}
+                                className={smallDangerBtn}
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          </article>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
       </div>
 
       {formModal && (
