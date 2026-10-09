@@ -51,105 +51,128 @@ export default function Offices({ user, setUser }) {
 
   return (
     <AdminLayout user={user} setUser={setUser}>
-      <PageHeader
-        title="Offices"
-        description="Government offices configured in QueueLess. Offices are set up in the system and cannot be added or edited here."
-      />
+      <div className="relative min-h-screen -m-6 p-6 lg:p-8">
+        {/* Background image overlay matching reference aesthetic */}
+        <div 
+          className="absolute inset-0 z-0 bg-cover bg-center bg-fixed pointer-events-none opacity-25"
+          style={{ backgroundImage: `url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=2000&q=80')` }}
+        />
+        <div className="absolute inset-0 z-0 bg-gradient-to-br from-slate-950/70 via-slate-900/60 to-teal-950/70 backdrop-blur-[2px] pointer-events-none" />
 
-      <div className="mt-8">
-        {loading && <LoadingBlock label="Loading offices..." />}
-        {!loading && error && <ErrorBlock message={error} onRetry={load} />}
-
-        {!loading && !error && offices.length === 0 && (
-          <EmptyState
-            icon="🏛️"
-            title="No offices found"
-            description="The backend did not return any offices."
-          />
-        )}
-
-        {!loading && !error && offices.length > 0 && (
-          <div className="grid gap-6 lg:grid-cols-2">
-            {offices.map((office) => {
-              const entry = countersByOffice[office._id] || {};
-              const counters = entry.counters || [];
-
-              return (
-                <article
-                  key={office._id}
-                  className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-50 to-purple-50 text-xl">
-                      🏛️
-                    </div>
-                    <div>
-                      <h2 className="text-xl font-bold text-slate-900">{office.name}</h2>
-                      <p className="mt-1 text-sm text-slate-500">
-                        {[office.code, office.type].filter(Boolean).join(" · ")}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="mt-6">
-                    <h3 className="text-sm font-semibold text-slate-700">
-                      Counters{entry.counters ? ` (${counters.length})` : ""}
-                    </h3>
-
-                    {entry.error && (
-                      <p className="mt-2 text-sm text-red-600">{entry.error}</p>
-                    )}
-
-                    {entry.counters && counters.length === 0 && (
-                      <p className="mt-2 text-sm text-slate-500">
-                        No counters have been created for this office yet.
-                      </p>
-                    )}
-
-                    {counters.length > 0 && (
-                      <ul className="mt-3 space-y-2">
-                        {counters.map((counter) => (
-                          <li
-                            key={counter._id}
-                            className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3"
-                          >
-                            <div>
-                              <p className="text-sm font-semibold text-slate-900">
-                                {counter.name}
-                              </p>
-                              {counter.currentTokenId && (
-                                <p className="text-xs text-slate-500">
-                                  Token {counter.currentTokenId.tokenNumber} ·{" "}
-                                  {counter.currentTokenId.status}
-                                </p>
-                              )}
-                            </div>
-                            <StatusBadge status={counter.status} />
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-
-                  <div className="mt-6 flex flex-wrap gap-3">
-                    <Link
-                      to={`/admin/services?office=${office._id}`}
-                      className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-                    >
-                      View services
-                    </Link>
-                    <Link
-                      to={`/admin/counters?office=${office._id}`}
-                      className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-                    >
-                      Manage counters
-                    </Link>
-                  </div>
-                </article>
-              );
-            })}
+        <div className="relative z-10 space-y-6">
+          <div className="bg-white/70 backdrop-blur-xl border border-white/40 shadow-xl rounded-3xl p-6 lg:p-8">
+            <PageHeader
+              title="Offices"
+              description="Government offices configured in QueueLess. Offices are set up in the system and cannot be added or edited here."
+            />
           </div>
-        )}
+
+          <div className="space-y-6">
+            {loading && (
+              <div className="bg-white/70 backdrop-blur-xl border border-white/40 rounded-3xl p-12 shadow-xl">
+                <LoadingBlock label="Loading offices..." />
+              </div>
+            )}
+            {!loading && error && (
+              <div className="bg-white/70 backdrop-blur-xl border border-white/40 rounded-3xl p-12 shadow-xl">
+                <ErrorBlock message={error} onRetry={load} />
+              </div>
+            )}
+
+            {!loading && !error && offices.length === 0 && (
+              <div className="bg-white/70 backdrop-blur-xl border border-white/40 rounded-3xl p-12 shadow-xl">
+                <EmptyState
+                  icon="🏛️"
+                  title="No offices found"
+                  description="The backend did not return any offices."
+                />
+              </div>
+            )}
+
+            {!loading && !error && offices.length > 0 && (
+              <div className="grid gap-6 lg:grid-cols-2">
+                {offices.map((office) => {
+                  const entry = countersByOffice[office._id] || {};
+                  const counters = entry.counters || [];
+
+                  return (
+                    <article
+                      key={office._id}
+                      className="rounded-3xl border border-white/40 bg-white/75 backdrop-blur-xl p-6 lg:p-8 shadow-2xl transition-all hover:bg-white/90"
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-500/10 to-emerald-500/10 border border-teal-500/20 text-xl text-teal-700 shadow-sm">
+                          🏛️
+                        </div>
+                        <div>
+                          <h2 className="text-xl font-bold text-slate-900">{office.name}</h2>
+                          <p className="mt-1 text-sm font-medium text-slate-500">
+                            {[office.code, office.type].filter(Boolean).join(" · ")}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="mt-6">
+                        <h3 className="text-sm font-semibold text-slate-700">
+                          Counters{entry.counters ? ` (${counters.length})` : ""}
+                        </h3>
+
+                        {entry.error && (
+                          <p className="mt-2 text-sm font-medium text-red-600">{entry.error}</p>
+                        )}
+
+                        {entry.counters && counters.length === 0 && (
+                          <p className="mt-2 text-sm font-medium text-slate-500">
+                            No counters have been created for this office yet.
+                          </p>
+                        )}
+
+                        {counters.length > 0 && (
+                          <ul className="mt-3 space-y-2">
+                            {counters.map((counter) => (
+                              <li
+                                key={counter._id}
+                                className="flex items-center justify-between rounded-2xl bg-white/60 backdrop-blur-md border border-slate-200/60 px-4 py-3 shadow-sm transition-all hover:bg-white"
+                              >
+                                <div>
+                                  <p className="text-sm font-semibold text-slate-900">
+                                    {counter.name}
+                                  </p>
+                                  {counter.currentTokenId && (
+                                    <p className="text-xs font-medium text-slate-500">
+                                      Token {counter.currentTokenId.tokenNumber} ·{" "}
+                                      {counter.currentTokenId.status}
+                                    </p>
+                                  )}
+                                </div>
+                                <StatusBadge status={counter.status} />
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+
+                      <div className="mt-6 flex flex-wrap gap-3">
+                        <Link
+                          to={`/admin/services?office=${office._id}`}
+                          className="rounded-xl border border-slate-200/80 bg-white/80 backdrop-blur-md px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-white hover:shadow-sm"
+                        >
+                          View services
+                        </Link>
+                        <Link
+                          to={`/admin/counters?office=${office._id}`}
+                          className="rounded-xl border border-slate-200/80 bg-white/80 backdrop-blur-md px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-white hover:shadow-sm"
+                        >
+                          Manage counters
+                        </Link>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </AdminLayout>
   );
