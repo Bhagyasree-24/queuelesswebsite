@@ -49,7 +49,7 @@ export default function Login() {
         return;
       }
 
-      // Confirm the current session and get the actual logged-in user.
+      // Verify the authenticated session
       const currentUser = await getCurrentUser();
 
       if (!currentUser.authenticated || !currentUser.user) {
@@ -59,14 +59,18 @@ export default function Login() {
         return;
       }
 
+      // Get the actual role from the verified session
       const role = currentUser.user.role;
 
+      console.log("Authenticated user:", currentUser.user);
+      console.log("User role:", role);
+
+      // Redirect based on role
       if (role === "citizen") {
         navigate("/citizen", { replace: true });
       } else if (role === "operator") {
         navigate("/operator", { replace: true });
       } else if (role === "admin") {
-        console.log("redirecting to admin");
         navigate("/admin", { replace: true });
       } else {
         setError("Unknown user role");

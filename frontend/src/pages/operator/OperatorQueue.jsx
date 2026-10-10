@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import OperatorNavbar from "../../components/operator/OperatorNavbar";
+import useOperatorSocket from "../../hooks/useOperatorSocket";
 
 import {
   getOperatorDashboard,
@@ -44,6 +45,9 @@ function Icon({ children, className = "" }) {
 ------------------------------------------------------- */
 
 export default function OperatorQueue({ user }) {
+  console.log("OPERATOR QUEUE FILE UPDATED");
+  console.log("[OperatorQueue] FUNCTION ENTERED");
+
   const navigate = useNavigate();
 
   const [dashboard, setDashboard] = useState(null);
@@ -77,6 +81,17 @@ export default function OperatorQueue({ user }) {
   useEffect(() => {
     load();
   }, [load]);
+
+  const officeId = getId(dashboard?.office);
+
+  console.log("[OperatorQueue] About to call socket hook");
+
+  useOperatorSocket({
+    officeId,
+    onQueueChange: load,
+  });
+
+  console.log("[OperatorQueue] Socket hook call finished");
 
   /* -------------------------------------------------------
      Existing action handler
@@ -897,7 +912,7 @@ export default function OperatorQueue({ user }) {
 
               <button
                 type="button"
-                onClick={() => navigate("/operator/dashboard")}
+                onClick={() => navigate("/operator")}
                 className="group rounded-[22px] border border-slate-200 bg-white p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-teal-200 hover:shadow-md"
               >
                 <div className="flex items-center gap-4">

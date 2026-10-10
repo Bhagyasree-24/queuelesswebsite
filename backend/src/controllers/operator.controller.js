@@ -1,10 +1,10 @@
-
 const mongoose = require('mongoose');
 
 const Token = require('../models/Token');
 const Office = require('../models/Office');
 const Counter = require('../models/Counter');
 const ExpressError = require('../utils/ExpressError');
+
 const {
   getTodayBounds,
   expirePreviousDayUnservedTokens
@@ -14,7 +14,10 @@ const {
 const emitQueueUpdate = (req, officeId, event, data) => {
   const io = req.app.get('io');
 
-  if (!io) return;
+  if (!io) {
+    console.warn('[Socket.IO] Socket server unavailable');
+    return;
+  }
 
   io.to(`office:${officeId}`).emit(event, data);
 };
@@ -29,9 +32,11 @@ const getDashboard = async (req, res) => {
   }
 
   await expirePreviousDayUnservedTokens();
+
   const { start, end } = getTodayBounds();
 
   const office = await Office.findById(req.user.officeId);
+
   if (!office) {
     throw new ExpressError(404, 'Assigned office not found');
   }
@@ -53,12 +58,22 @@ const getDashboard = async (req, res) => {
       .populate('userId', 'name email');
   }
 
+  // Tokens currently waiting today
   const waitingCount = await Token.countDocuments({
     officeId: req.user.officeId,
     status: 'WAITING',
     createdAt: { $gte: start, $lt: end }
   });
 
+  // Tokens completed today by this operator's assigned counter
+  const servedTodayCount = await Token.countDocuments({
+    officeId: req.user.officeId,
+    counterId: req.user.counterId,
+    status: 'COMPLETED',
+    completedAt: { $gte: start, $lt: end }
+  });
+
+  // Return dashboard data, including today's served count
   res.status(200).json({
     success: true,
     dashboard: {
@@ -70,7 +85,8 @@ const getDashboard = async (req, res) => {
       office,
       counter,
       currentToken,
-      waitingCount
+      waitingCount,
+      servedTodayCount
     }
   });
 };
@@ -78,10 +94,14 @@ const getDashboard = async (req, res) => {
 // 2. GET /api/operator/queue
 const getQueue = async (req, res) => {
   if (!req.user.officeId) {
-    throw new ExpressError(400, 'Operator is not assigned to an office');
+    throw new ExpressError(
+      400,
+      'Operator is not assigned to an office'
+    );
   }
 
   await expirePreviousDayUnservedTokens();
+
   const { start, end } = getTodayBounds();
 
   const queue = await Token.find({
@@ -92,7 +112,9 @@ const getQueue = async (req, res) => {
     .sort({ createdAt: 1 })
     .populate('serviceId', 'name code averageServiceTime')
     .populate('counterId', 'name number status')
-    .select('tokenNumber status serviceId counterId createdAt calledAt startedAt');
+    .select(
+      'tokenNumber status serviceId counterId createdAt calledAt startedAt'
+    );
 
   res.status(200).json({
     success: true,
@@ -110,6 +132,7 @@ const callNextToken = async (req, res) => {
   }
 
   await expirePreviousDayUnservedTokens();
+
   const { start, end } = getTodayBounds();
 
   const counter = await Counter.findById(req.user.counterId);
@@ -118,7 +141,7 @@ const callNextToken = async (req, res) => {
     throw new ExpressError(404, 'Assigned counter not found');
   }
 
-  if (counter.status === 'PAUSED' || counter.status === 'OFFLINE') {
+  if (['PAUSED', 'OFFLINE'].includes(counter.status)) {
     throw new ExpressError(
       400,
       `Cannot call token when counter is ${counter.status}`
@@ -278,11 +301,13 @@ const completeToken = async (req, res) => {
     );
   }
 
+  // Mark the token as completed and save the completion timestamp.
   token.status = 'COMPLETED';
   token.completedAt = new Date();
 
   await token.save();
 
+  // Release the counter.
   const counter = await Counter.findById(req.user.counterId);
 
   if (counter) {
@@ -292,6 +317,7 @@ const completeToken = async (req, res) => {
 
   const officeId = token.officeId.toString();
 
+  // Notify connected clients.
   emitQueueUpdate(req, officeId, 'queue:updated', {
     officeId,
     tokenId: token._id.toString(),
@@ -454,7 +480,10 @@ const updateCounterStatus = async (req, res) => {
   }
 
   if (!req.user.counterId) {
-    throw new ExpressError(400, 'Operator is not assigned to a counter');
+    throw new ExpressError(
+      400,
+      'Operator is not assigned to a counter'
+    );
   }
 
   const counter = await Counter.findById(req.user.counterId);

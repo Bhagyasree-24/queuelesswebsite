@@ -3,8 +3,10 @@ const mongoose = require('mongoose');
 const Token = require('../models/Token');
 const Office = require('../models/Office');
 const Service = require('../models/Service');
-const Counter = require("../models/Counter");
+const Counter = require('../models/Counter');
+const { predictWaitTime } = require('../utils/mlPrediction');
 const ExpressError = require('../utils/ExpressError');
+
 const {
   getTodayBounds,
   getTokenAvailability,
@@ -14,25 +16,43 @@ const {
 
 const ACTIVE_STATUSES = ['WAITING', 'CALLED', 'SERVING'];
 
+// Emit queue updates to clients joined to the office's Socket.IO room.
+const emitQueueUpdated = (req, payload) => {
+  const io = req.app.get('io');
+
+  if (!io) {
+    console.warn(
+      '[Socket.IO] Socket server unavailable; queue update was not emitted.'
+    );
+    return;
+  }
+
+  io.to(`office:${payload.officeId}`).emit('queue:updated', payload);
+};
+
 // 1. GET /api/offices/:officeId/services/:serviceId/queue
 const getQueue = async (req, res) => {
   await expirePreviousDayUnservedTokens();
+
   const { start, end } = getTodayBounds();
   const { officeId, serviceId } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(officeId)) {
     throw new ExpressError(400, 'Invalid office ID format');
   }
+
   if (!mongoose.Types.ObjectId.isValid(serviceId)) {
     throw new ExpressError(400, 'Invalid service ID format');
   }
 
   const office = await Office.findById(officeId);
+
   if (!office) {
     throw new ExpressError(404, 'Office not found');
   }
 
   const service = await Service.findById(serviceId);
+
   if (!service || service.officeId.toString() !== officeId) {
     throw new ExpressError(404, 'Service not found for this office');
   }
@@ -65,27 +85,32 @@ const getQueue = async (req, res) => {
 // 2. POST /api/tokens - Generate token
 const createToken = async (req, res) => {
   await expirePreviousDayUnservedTokens();
+
   const now = new Date();
   const { officeId, serviceId } = req.body;
 
   if (!officeId || !mongoose.Types.ObjectId.isValid(officeId)) {
     throw new ExpressError(400, 'Valid officeId is required');
   }
+
   if (!serviceId || !mongoose.Types.ObjectId.isValid(serviceId)) {
     throw new ExpressError(400, 'Valid serviceId is required');
   }
 
   const office = await Office.findById(officeId);
+
   if (!office) {
     throw new ExpressError(404, 'Office not found');
   }
 
   const availability = getTokenAvailability(office, now);
+
   if (!availability.allowed) {
     throw new ExpressError(400, availability.message);
   }
 
   const service = await Service.findById(serviceId);
+
   if (!service || service.officeId.toString() !== officeId) {
     throw new ExpressError(404, 'Service not found for this office');
   }
@@ -94,7 +119,7 @@ const createToken = async (req, res) => {
     throw new ExpressError(400, 'Selected service is currently inactive');
   }
 
-  // Check if user already has an active token
+  // Prevent users from generating another active token.
   const existingActiveToken = await Token.findOne({
     userId: req.user._id,
     status: { $in: ACTIVE_STATUSES }
@@ -107,12 +132,17 @@ const createToken = async (req, res) => {
     );
   }
 
-  const capacity = await checkQueueCanFinishBeforeClosing({ office, service, now });
+  const capacity = await checkQueueCanFinishBeforeClosing({
+    office,
+    service,
+    now
+  });
+
   if (!capacity.allowed) {
     throw new ExpressError(400, capacity.message);
   }
 
-  // Generate hackathon-friendly token sequence (T001, T002, ...)
+  // Generate token number.
   const totalTokens = await Token.countDocuments({});
   const tokenNumber = `T${String(totalTokens + 1).padStart(3, '0')}`;
 
@@ -127,6 +157,15 @@ const createToken = async (req, res) => {
 
   await token.save();
 
+  // SOCKET.IO: notify the operator queue that a token was created.
+  emitQueueUpdated(req, {
+    officeId: officeId.toString(),
+    serviceId: serviceId.toString(),
+    tokenId: token._id.toString(),
+    tokenNumber: token.tokenNumber,
+    status: token.status
+  });
+
   res.status(201).json({
     success: true,
     message: 'Token generated successfully',
@@ -134,10 +173,12 @@ const createToken = async (req, res) => {
   });
 };
 
-// 3. GET /api/tokens/my-active - Get user's current active token
+// 3. GET /api/tokens/my-active
 const getMyActiveToken = async (req, res) => {
   await expirePreviousDayUnservedTokens();
+
   const { start, end } = getTodayBounds();
+
   const activeToken = await Token.findOne({
     userId: req.user._id,
     status: { $in: ACTIVE_STATUSES },
@@ -158,31 +199,56 @@ const getMyActiveToken = async (req, res) => {
 
   let queuePosition = null;
   let estimatedWaitTimeMinutes = null;
+  let baselineWaitTimeMinutes = null;
+  let waitTimeModel = null;
+  let activeCounters = null;
 
   if (activeToken.status === 'WAITING') {
     const tokensAhead = await Token.countDocuments({
       officeId: activeToken.officeId._id,
       serviceId: activeToken.serviceId._id,
       status: { $in: ACTIVE_STATUSES },
-      createdAt: { $gte: start, $lt: end, $lte: activeToken.createdAt }
+      createdAt: {
+        $gte: start,
+        $lt: end,
+        $lte: activeToken.createdAt
+      }
     });
 
     queuePosition = tokensAhead;
-    const avgTime = activeToken.serviceId.averageServiceTime || 0;
-    estimatedWaitTimeMinutes = Math.max(0, (queuePosition - 1) * avgTime);
+
+    // AVAILABLE counters remain active even while serving a token.
+    activeCounters = await Counter.countDocuments({
+      officeId: activeToken.officeId._id,
+      status: 'AVAILABLE'
+    });
+
+    const prediction = await predictWaitTime({
+      peopleAhead: Math.max(0, queuePosition - 1),
+      averageServiceTime: activeToken.serviceId.averageServiceTime,
+      activeCounters
+    });
+
+    estimatedWaitTimeMinutes = prediction.predictedWaitTime;
+    baselineWaitTimeMinutes = prediction.baselineWaitTime;
+    waitTimeModel = prediction.modelUsed;
   }
 
   res.status(200).json({
     success: true,
     token: activeToken,
     queuePosition,
-    estimatedWaitTimeMinutes
+    estimatedWaitTimeMinutes,
+    baselineWaitTimeMinutes,
+    waitTimeModel,
+    activeCounters
   });
 };
 
-// 4. GET /api/tokens/:tokenId - View single token details
+// 4. GET /api/tokens/:tokenId
 const getTokenById = async (req, res) => {
   await expirePreviousDayUnservedTokens();
+
   const { start, end } = getTodayBounds();
   const { tokenId } = req.params;
 
@@ -199,7 +265,7 @@ const getTokenById = async (req, res) => {
     throw new ExpressError(404, 'Token not found');
   }
 
-  // Access control: Citizens can only view their own tokens
+  // Citizens can only view their own tokens.
   if (
     req.user.role === 'citizen' &&
     token.userId.toString() !== req.user._id.toString()
@@ -209,29 +275,53 @@ const getTokenById = async (req, res) => {
 
   let queuePosition = null;
   let estimatedWaitTimeMinutes = null;
+  let baselineWaitTimeMinutes = null;
+  let waitTimeModel = null;
+  let activeCounters = null;
 
   if (token.status === 'WAITING') {
     const tokensAhead = await Token.countDocuments({
       officeId: token.officeId._id,
       serviceId: token.serviceId._id,
       status: { $in: ACTIVE_STATUSES },
-      createdAt: { $gte: start, $lt: end, $lte: token.createdAt }
+      createdAt: {
+        $gte: start,
+        $lt: end,
+        $lte: token.createdAt
+      }
     });
 
     queuePosition = tokensAhead;
-    const avgTime = token.serviceId.averageServiceTime || 0;
-    estimatedWaitTimeMinutes = Math.max(0, (queuePosition - 1) * avgTime);
+
+    // AVAILABLE counters remain active even while serving a token.
+    activeCounters = await Counter.countDocuments({
+      officeId: token.officeId._id,
+      status: 'AVAILABLE'
+    });
+
+    const prediction = await predictWaitTime({
+      peopleAhead: Math.max(0, queuePosition - 1),
+      averageServiceTime: token.serviceId.averageServiceTime,
+      activeCounters
+    });
+
+    estimatedWaitTimeMinutes = prediction.predictedWaitTime;
+    baselineWaitTimeMinutes = prediction.baselineWaitTime;
+    waitTimeModel = prediction.modelUsed;
   }
 
   res.status(200).json({
     success: true,
     token,
     queuePosition,
-    estimatedWaitTimeMinutes
+    estimatedWaitTimeMinutes,
+    baselineWaitTimeMinutes,
+    waitTimeModel,
+    activeCounters
   });
 };
 
-// 5. PATCH /api/tokens/:tokenId/cancel - Cancel active token
+// 5. PATCH /api/tokens/:tokenId/cancel
 const cancelToken = async (req, res) => {
   const { tokenId } = req.params;
 
@@ -245,7 +335,7 @@ const cancelToken = async (req, res) => {
     throw new ExpressError(404, 'Token not found');
   }
 
-  // Citizens can only cancel their own token
+  // Citizens can only cancel their own tokens.
   if (
     req.user.role === 'citizen' &&
     token.userId.toString() !== req.user._id.toString()
@@ -261,7 +351,17 @@ const cancelToken = async (req, res) => {
   }
 
   token.status = 'CANCELLED';
+
   await token.save();
+
+  // SOCKET.IO: notify operators that the token was cancelled.
+  emitQueueUpdated(req, {
+    officeId: token.officeId.toString(),
+    serviceId: token.serviceId.toString(),
+    tokenId: token._id.toString(),
+    tokenNumber: token.tokenNumber,
+    status: token.status
+  });
 
   res.status(200).json({
     success: true,

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import OperatorNavbar from "../../components/operator/OperatorNavbar";
+import useOperatorSocket from "../../hooks/useOperatorSocket";
 
 import {
   getOperatorDashboard,
@@ -213,6 +214,14 @@ export default function OperatorDashboard({ user }) {
     load();
   }, [load]);
 
+  // Keep dashboard statistics (including Tokens Served Today) in sync with live queue events.
+  const officeId = getId(dashboard?.office);
+
+  useOperatorSocket({
+    officeId,
+    onQueueChange: load,
+  });
+
   async function runAction(key, fn, successFallback) {
     if (busy) return;
 
@@ -297,6 +306,12 @@ export default function OperatorDashboard({ user }) {
       value: queue.length,
       description: "Waiting, called or serving",
       icon: <QueueIcon />,
+    },
+    {
+      label: "Tokens Served Today",
+      value: dashboard?.servedTodayCount ?? 0,
+      description: "Completed at your counter today",
+      icon: <CheckIcon />,
     },
   ];
 
@@ -453,7 +468,7 @@ export default function OperatorDashboard({ user }) {
                 STAT CARDS
             ================================================= */}
 
-            <section className="-mt-1 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <section className="-mt-1 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
 
               {stats.map((stat) => (
                 <div
