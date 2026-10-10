@@ -57,7 +57,7 @@ export default function App() {
     <Routes>
       {/* Public */}
       <Route path="/" element={<Landing />} />
-      <Route path="/login" element={<Login />} />
+      <Route path="/login" element={<Login onLogin={setUser} />} />
       <Route path="/register" element={<Register />} />
 
       {/* Citizen */}

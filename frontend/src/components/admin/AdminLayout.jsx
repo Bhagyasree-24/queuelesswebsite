@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useEffect, useState } from "react";
 import { Link, NavLink, Navigate, useNavigate } from "react-router-dom";
 import { logoutUser } from "../../services/authApi";
 
@@ -25,14 +26,22 @@ export default function AdminLayout({ user, children }) {
   const [loggingOut, setLoggingOut] = useState(false);
   const [logoutError, setLogoutError] = useState("");
 
+  // Close the profile menu when the user object changes.
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [user?.id, user?.email, user?.name]);
+
   async function handleLogout() {
     setLoggingOut(true);
     setLogoutError("");
 
     try {
       await logoutUser();
+
+      // Replace the current page after logout.
       navigate("/login", { replace: true });
-    } catch {
+    } catch (error) {
+      console.error("Logout failed:", error);
       setLogoutError("Logout failed. Please try again.");
       setLoggingOut(false);
     }
@@ -65,26 +74,24 @@ export default function AdminLayout({ user, children }) {
     );
   }
 
-  const initial = (user.name || user.email || "A")
-    .charAt(0)
-    .toUpperCase();
+  // Use the latest user object supplied by the parent.
+  const displayName = user.name?.trim() || user.email || "Administrator";
+  const displayEmail = user.email || "";
+  const initial = displayName.charAt(0).toUpperCase();
 
   return (
     <div className="min-h-screen bg-slate-50">
       <header className="sticky top-0 z-40 border-b border-slate-200 bg-white">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-8">
-            <Link
-              to="/admin"
-              className="text-2xl font-bold tracking-tight"
-            >
+            <Link to="/admin" className="text-2xl font-bold tracking-tight">
               <span className="text-slate-900">Queue</span>
               <span className="text-blue-600">Less</span>
             </Link>
 
             <nav
               className="hidden items-center gap-1 lg:flex"
-              aria-label="Admin"
+              aria-label="Admin navigation"
             >
               {NAV_ITEMS.map((item) => (
                 <NavLink
@@ -113,11 +120,11 @@ export default function AdminLayout({ user, children }) {
 
               <div className="hidden text-left sm:block">
                 <p className="text-sm font-semibold text-slate-900">
-                  {user.name}
+                  {displayName}
                 </p>
 
                 <p className="text-xs capitalize text-slate-500">
-                  {user.role === "admin" ? "Administrator" : user.role}
+                  Administrator
                 </p>
               </div>
 
@@ -128,7 +135,7 @@ export default function AdminLayout({ user, children }) {
               <>
                 <button
                   type="button"
-                  aria-label="Close menu"
+                  aria-label="Close profile menu"
                   className="fixed inset-0 z-40 cursor-default"
                   onClick={() => setMenuOpen(false)}
                 />
@@ -144,11 +151,11 @@ export default function AdminLayout({ user, children }) {
 
                     <div className="min-w-0">
                       <p className="truncate font-semibold text-slate-900">
-                        {user.name}
+                        {displayName}
                       </p>
 
                       <p className="truncate text-sm text-slate-500">
-                        {user.email}
+                        {displayEmail}
                       </p>
 
                       <span className="mt-1 inline-block rounded-full bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-700">
@@ -179,7 +186,7 @@ export default function AdminLayout({ user, children }) {
 
         <nav
           className="flex gap-1 overflow-x-auto border-t border-slate-100 px-4 py-2 lg:hidden"
-          aria-label="Admin"
+          aria-label="Mobile admin navigation"
         >
           {NAV_ITEMS.map((item) => (
             <NavLink

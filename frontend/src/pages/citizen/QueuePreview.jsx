@@ -1,6 +1,20 @@
 
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Clock3,
+  Users,
+  Ticket,
+  ShieldCheck,
+  RefreshCw,
+  Building2,
+  CheckCircle2,
+  Radio,
+  CalendarClock,
+} from "lucide-react";
+
 import CitizenNavbar from "../../components/citizen/CitizenNavbar";
 import {
   getQueueInfo,
@@ -19,8 +33,6 @@ export default function QueuePreview({ user }) {
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
-
-  /* API functionality - unchanged */
 
   useEffect(() => {
     async function loadQueuePreview() {
@@ -108,438 +120,546 @@ export default function QueuePreview({ user }) {
     }
   };
 
+  const steps = [
+    {
+      number: "01",
+      title: "Get your token",
+      description:
+        "Generate a virtual token for your selected service.",
+      icon: Ticket,
+    },
+    {
+      number: "02",
+      title: "Track your queue",
+      description:
+        "Monitor your queue position and estimated waiting time.",
+      icon: Radio,
+    },
+    {
+      number: "03",
+      title: "Plan your visit",
+      description:
+        "Visit the office when your token is getting closer.",
+      icon: CalendarClock,
+    },
+  ];
+
+  const categories = [
+    { label: "Citizen services", icon: Building2 },
+    { label: "Queue tracking", icon: Radio },
+    { label: "Virtual tokens", icon: Ticket },
+    { label: "Wait-time estimates", icon: Clock3 },
+  ];
+
   return (
-    <div className="min-h-screen bg-[#F7F8FA] text-slate-900">
-      {/* NAVBAR */}
+    <div className="min-h-screen bg-[#F8F7F2] text-[#171717]">
       <CitizenNavbar user={user} />
 
       {/* HERO */}
-      <section className="relative overflow-hidden bg-[#15396B]">
-        <div className="absolute -left-32 -top-32 h-96 w-96 rounded-full bg-amber-400/10 blur-3xl" />
-        <div className="absolute -right-32 top-20 h-96 w-96 rounded-full bg-blue-300/10 blur-3xl" />
-        <div className="absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-amber-200/5 blur-3xl" />
-
-        <div className="relative mx-auto max-w-7xl px-4 pb-14 pt-8 sm:px-6 lg:px-8">
-          {/* Back button */}
-          <button
-            type="button"
-            onClick={() =>
-              navigate(`/citizen/offices/${officeId}/services`)
-            }
-            className="group mb-10 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium text-slate-200 backdrop-blur-sm transition hover:border-amber-400/50 hover:bg-white/10 hover:text-amber-300"
-          >
-            <span className="transition-transform group-hover:-translate-x-1">
-              ←
-            </span>
-            Back to services
-          </button>
-
-          <div className="grid items-center gap-10 lg:grid-cols-[1fr_430px]">
-            {/* Hero text */}
-            <div className="max-w-2xl">
-              <div className="inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-400/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-amber-300">
-                <span className="h-2 w-2 rounded-full bg-amber-400" />
-                Official Digital Queue
-              </div>
-
-              <p className="mt-7 text-sm font-semibold uppercase tracking-[0.12em] text-amber-300">
-                {office?.name || "Government Office"}
-              </p>
-
-              <h1 className="mt-3 text-4xl font-extrabold leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-6xl">
-                Check the queue.
-                <br />
-                <span className="text-[#F4B544]">
-                  Save your time.
-                </span>
-              </h1>
-
-              <p className="mt-6 max-w-xl text-base leading-7 text-slate-300 sm:text-lg">
-                See the live queue before visiting the office.
-                Get an estimate of your waiting time and join
-                the virtual queue when you're ready.
-              </p>
-
-              {/* Trust indicators */}
-              <div className="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-sm text-slate-200">
-                <div className="flex items-center gap-2">
-                  <span className="font-bold text-[#F4B544]">✓</span>
-                  Live queue status
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <span className="font-bold text-[#F4B544]">✓</span>
-                  Virtual token
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <span className="font-bold text-[#F4B544]">✓</span>
-                  Real-time tracking
-                </div>
-              </div>
+      <section className="mx-auto max-w-7xl px-4 pb-10 pt-5 sm:px-6 lg:px-8">
+        {/* Brand row */}
+        <div className="flex items-center justify-between gap-4 pb-5">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#F2E36D] text-[#171717]">
+              <Ticket size={19} strokeWidth={2.2} />
             </div>
 
-            {/* MINI QUEUE PREVIEW CARD */}
-            <div className="relative hidden lg:block">
-              <div className="absolute -inset-4 rounded-[2rem] bg-amber-400/10 blur-2xl" />
+            <div>
+              <p className="text-base font-extrabold tracking-tight">
+                QueueLess
+              </p>
+              <p className="mt-0.5 text-[11px] text-[#77766D]">
+                Your time matters
+              </p>
+            </div>
+          </div>
 
-              <div className="relative rounded-[2rem] border border-white/30 bg-[#F7F8FA] p-5 shadow-2xl">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-blue-100 bg-blue-50 text-xl">
-                      🏛️
-                    </div>
+          <div className="hidden items-center gap-2 text-xs font-medium text-[#66645B] sm:flex">
+            <ShieldCheck size={16} className="text-[#82792D]" />
+            Digital public services
+          </div>
+        </div>
 
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                        Current Queue
-                      </p>
-                      <p className="mt-1 font-bold text-slate-900">
-                        {service?.name || "Service Counter"}
-                      </p>
-                    </div>
-                  </div>
+        {/* Main hero */}
+        <div className="grid overflow-hidden rounded-2xl bg-[#EAE9E2] lg:min-h-[430px] lg:grid-cols-[1.02fr_0.98fr]">
+          <div className="flex flex-col justify-center px-6 py-9 sm:px-10 sm:py-12 lg:px-12 lg:py-14">
+            <button
+              type="button"
+              onClick={() =>
+                navigate(`/citizen/offices/${officeId}/services`)
+              }
+              className="mb-9 flex w-fit items-center gap-2 text-sm font-medium text-[#65645C] transition hover:text-black"
+            >
+              <ArrowLeft size={16} />
+              Back to services
+            </button>
 
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1.5 text-xs font-bold text-emerald-700">
-                    <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                    Live
+            <div className="mb-5 flex w-fit items-center gap-2 rounded-full bg-white px-3 py-2 text-[10px] font-bold uppercase tracking-[0.14em] text-[#57564D]">
+              <span className="h-2 w-2 rounded-full bg-[#D7C943]" />
+              Simple. Smart. Stress-free.
+            </div>
+
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#77756A]">
+              {office?.name || "Government office"}
+            </p>
+
+            <h1 className="mt-5 max-w-xl text-[clamp(2.8rem,6vw,5.1rem)] font-black leading-[0.91] tracking-[-0.065em] text-[#171717]">
+              WAIT LESS.
+              <br />
+              DO MORE.
+              <br />
+              <span className="box-decoration-clone bg-[#F2E36D] px-1">
+                YOUR TIME.
+              </span>
+            </h1>
+
+            <p className="mt-6 max-w-md text-sm leading-7 text-[#68675F] sm:text-[15px]">
+              Check the live queue before you leave home. Get a
+              virtual token, see your estimated waiting time, and
+              plan your visit without standing in a long line.
+            </p>
+
+            <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-3">
+              <button
+                type="button"
+                onClick={handleGenerateToken}
+                disabled={generating || loading || !service}
+                className="inline-flex min-h-12 items-center justify-center gap-3 rounded-md bg-[#171717] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#393830] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {generating ? "Generating token..." : "Get a token"}
+                {!generating && <ArrowRight size={16} />}
+              </button>
+
+              <button
+                type="button"
+                onClick={() =>
+                  document
+                    .getElementById("queue-details")
+                    ?.scrollIntoView({ behavior: "smooth" })
+                }
+                className="inline-flex min-h-12 items-center gap-2 text-sm font-bold text-[#292923] transition hover:text-[#82792D]"
+              >
+                View queue
+                <ArrowRight size={15} />
+              </button>
+            </div>
+
+            <div className="mt-8 flex flex-wrap gap-x-5 gap-y-2 text-xs text-[#66665C]">
+              <span className="flex items-center gap-1.5">
+                <CheckCircle2 size={14} className="text-[#8A7E21]" />
+                Live queue status
+              </span>
+              <span className="flex items-center gap-1.5">
+                <CheckCircle2 size={14} className="text-[#8A7E21]" />
+                Virtual tokens
+              </span>
+              <span className="flex items-center gap-1.5">
+                <CheckCircle2 size={14} className="text-[#8A7E21]" />
+                Easy access
+              </span>
+            </div>
+          </div>
+
+          {/* Queue overview */}
+          <div className="flex items-center bg-[#F1EFAF] p-4 sm:p-7 lg:p-8">
+            <div className="w-full rounded-xl bg-[#FCFBF6] p-5 sm:p-7">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#858174]">
+                    Your queue overview
+                  </p>
+                  <h2 className="mt-3 break-words text-xl font-bold tracking-tight text-[#202019] sm:text-2xl">
+                    {service?.name || "Service counter"}
+                  </h2>
+                  <p className="mt-1 break-words text-xs text-[#77756B]">
+                    {office?.name || "Government office"}
+                  </p>
+                </div>
+
+                <span className="flex shrink-0 items-center gap-1.5 text-xs font-semibold text-[#55522F]">
+                  <span className="h-2 w-2 rounded-full bg-[#A89A26]" />
+                  {loading ? "Updating" : "Live"}
+                </span>
+              </div>
+
+              <div className="mt-8 bg-[#F4F1D9] p-5 sm:p-6">
+                <div className="flex items-center gap-2 text-sm text-[#696752]">
+                  <Clock3 size={16} />
+                  Estimated waiting time
+                </div>
+
+                <div className="mt-3 flex items-baseline gap-2">
+                  <span className="text-6xl font-black leading-none tracking-[-0.06em] text-[#1C1C16] sm:text-7xl">
+                    {loading ? "—" : estimatedWaitTime}
+                  </span>
+                  <span className="text-sm text-[#777467]">
+                    minutes
                   </span>
                 </div>
 
-                {/* Wait time */}
-                <div className="mt-5 rounded-2xl border border-slate-200 bg-white px-5 py-7 text-center">
-                  <p className="text-xs font-bold uppercase tracking-widest text-slate-500">
-                    Estimated Wait
+                <div className="mt-6 h-1.5 overflow-hidden rounded-full bg-[#E2DFC5]">
+                  <div
+                    className="h-full rounded-full bg-[#D3C74C] transition-all duration-500"
+                    style={{
+                      width: `${Math.min(
+                        100,
+                        Math.max(12, peopleWaiting * 6)
+                      )}%`,
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div className="mt-5 grid grid-cols-2 gap-5">
+                <div className="py-2">
+                  <div className="flex items-center gap-2 text-xs text-[#77756B]">
+                    <Users size={15} />
+                    People waiting
+                  </div>
+                  <p className="mt-3 text-4xl font-bold tracking-tight text-[#202019]">
+                    {loading ? "—" : peopleWaiting}
                   </p>
-
-                  <div className="mt-2">
-                    <span className="text-5xl font-extrabold tracking-tight text-[#15396B]">
-                      {estimatedWaitTime}
-                    </span>
-                    <span className="ml-2 text-lg font-semibold text-slate-500">
-                      min
-                    </span>
-                  </div>
+                  <p className="mt-1 text-xs text-[#8A887D]">
+                    In the queue
+                  </p>
                 </div>
 
-                {/* Stats */}
-                <div className="mt-4 grid grid-cols-2 gap-3">
-                  <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                    <p className="text-xs font-medium text-slate-500">
-                      People waiting
-                    </p>
-                    <p className="mt-1 text-2xl font-bold text-[#15396B]">
-                      {peopleWaiting}
-                    </p>
+                <div className="py-2">
+                  <div className="flex items-center gap-2 text-xs text-[#77756B]">
+                    <Radio size={15} />
+                    Serving now
                   </div>
-
-                  <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                    <p className="text-xs font-medium text-slate-500">
-                      Serving now
-                    </p>
-                    <p className="mt-1 text-2xl font-bold text-[#15396B]">
-                      {currentServingToken}
-                    </p>
-                  </div>
+                  <p className="mt-3 break-words text-3xl font-bold tracking-tight text-[#202019]">
+                    {loading ? "—" : currentServingToken}
+                  </p>
+                  <p className="mt-1 text-xs text-[#8A887D]">
+                    Current token
+                  </p>
                 </div>
+              </div>
 
-                {/* Decorative queue indicator */}
-                <div className="mt-5">
-                  <div className="flex gap-2">
-                    <span className="h-2 flex-1 rounded-full bg-[#15396B]" />
-                    <span className="h-2 flex-1 rounded-full bg-[#315B8E]" />
-                    <span className="h-2 flex-1 rounded-full bg-[#F4B544]" />
-                    <span className="h-2 flex-1 rounded-full bg-slate-200" />
-                    <span className="h-2 flex-1 rounded-full bg-slate-200" />
-                  </div>
-
-                  <div className="mt-3 flex items-center gap-2 text-xs font-semibold text-[#15396B]">
-                    <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                    Queue is moving normally
-                  </div>
-                </div>
+              <div className="mt-5 flex items-center gap-2 text-xs text-[#77756B]">
+                <span className="h-2 w-2 rounded-full bg-[#A89A26]" />
+                {loading
+                  ? "Getting the latest queue information..."
+                  : "Queue information is up to date"}
               </div>
             </div>
           </div>
         </div>
+
+        {/* Service strip */}
+        <div className="mt-5 grid grid-cols-2 gap-x-5 gap-y-4 bg-[#F2E875] px-4 py-5 sm:grid-cols-4 sm:px-6">
+          {categories.map((item) => {
+            const Icon = item.icon;
+
+            return (
+              <div
+                key={item.label}
+                className="flex items-center gap-2.5 text-xs font-bold text-[#39372A]"
+              >
+                <Icon size={16} className="shrink-0" />
+                {item.label}
+              </div>
+            );
+          })}
+        </div>
       </section>
 
       {/* MAIN CONTENT */}
-      <main className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        {/* Loading */}
-        {loading ? (
-          <div className="mx-auto max-w-3xl rounded-[2rem] border border-slate-200 bg-white p-12 text-center shadow-sm">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-50">
-              <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#15396B] border-t-transparent" />
-            </div>
+      <main
+        id="queue-details"
+        className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8"
+      >
+        {/* Section heading */}
+        <div className="mb-9 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#8A8778]">
+              Start here
+            </p>
+            <h2 className="mt-3 text-3xl font-black tracking-[-0.045em] text-[#171717] sm:text-4xl">
+              QUEUE STATUS
+            </h2>
+            <p className="mt-3 text-sm text-[#77756B]">
+              {service?.name || "Your selected service"} · Current
+              queue information
+            </p>
+          </div>
 
-            <h2 className="mt-5 text-lg font-bold text-[#15396B]">
+          <div className="flex w-fit items-center gap-2 text-xs font-semibold text-[#666149]">
+            <span className="h-2 w-2 rounded-full bg-[#C5B838]" />
+            {loading ? "Updating queue" : "Queue overview"}
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="bg-white px-6 py-16 text-center">
+            <RefreshCw
+              className="mx-auto animate-spin text-[#A79A32]"
+              size={30}
+            />
+            <h2 className="mt-5 text-lg font-bold text-[#24241E]">
               Checking the live queue
             </h2>
-            <p className="mt-2 text-sm text-slate-500">
+            <p className="mt-2 text-sm text-[#858276]">
               Getting the latest queue information...
             </p>
           </div>
         ) : (
           <>
-            {/* Error */}
             {errorMessage && (
-              <div className="mx-auto mb-6 max-w-4xl rounded-2xl border border-red-200 bg-red-50 p-4 shadow-sm">
-                <div className="flex items-start gap-3">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-600">
-                    !
-                  </div>
-
-                  <div>
-                    <p className="font-semibold text-red-800">
-                      Unable to load queue
-                    </p>
-                    <p className="mt-1 text-sm text-red-700">
-                      {errorMessage}
-                    </p>
-                  </div>
-                </div>
+              <div
+                role="alert"
+                className="mb-6 bg-[#F8E9E3] p-5 text-[#963F32]"
+              >
+                <p className="text-sm font-bold">
+                  Unable to load queue
+                </p>
+                <p className="mt-2 text-sm leading-6">
+                  {errorMessage}
+                </p>
               </div>
             )}
 
-            {/* MAIN QUEUE SECTION */}
-            <div className="mx-auto max-w-5xl">
-              <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50">
-                      📊
-                    </span>
-                    <p className="text-sm font-bold uppercase tracking-wider text-[#15396B]">
-                      Live queue
+            {/* Statistics */}
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="bg-[#F2E875] p-6 sm:p-7">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm font-medium text-[#5E592C]">
+                    Estimated waiting time
+                  </p>
+                  <Clock3 size={21} className="text-[#5E592C]" />
+                </div>
+
+                <p className="mt-8 text-5xl font-black tracking-[-0.06em] text-[#1D1D17]">
+                  {estimatedWaitTime}
+                  <span className="ml-2 text-sm font-semibold tracking-normal text-[#5E592C]">
+                    min
+                  </span>
+                </p>
+                <p className="mt-3 text-xs text-[#69643C]">
+                  Based on the current waiting queue
+                </p>
+              </div>
+
+              <div className="bg-white p-6 sm:p-7">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm font-medium text-[#77756B]">
+                    People waiting
+                  </p>
+                  <Users size={21} className="text-[#8B812E]" />
+                </div>
+
+                <p className="mt-8 text-5xl font-black tracking-[-0.06em] text-[#1D1D17]">
+                  {peopleWaiting}
+                </p>
+                <p className="mt-3 text-xs text-[#858276]">
+                  People in the waiting queue
+                </p>
+              </div>
+
+              <div className="bg-[#EFEEE6] p-6 sm:col-span-2 sm:p-7 xl:col-span-1">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm font-medium text-[#77756B]">
+                    Currently serving
+                  </p>
+                  <Ticket size={21} className="text-[#8B812E]" />
+                </div>
+
+                <p className="mt-8 break-words text-4xl font-black tracking-tight text-[#1D1D17]">
+                  {currentServingToken}
+                </p>
+                <p className="mt-3 text-xs text-[#858276]">
+                  Current serving or called token
+                </p>
+              </div>
+            </div>
+
+            {/* Service details heading */}
+            <div className="mb-7 mt-14">
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#8A8778]">
+                Everything you need to know
+              </p>
+              <h2 className="mt-3 text-3xl font-black tracking-[-0.045em] text-[#171717] sm:text-4xl">
+                YOUR SERVICE DETAILS
+              </h2>
+            </div>
+
+            <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
+              {/* Office details */}
+              <section className="bg-white p-6 sm:p-8">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-[#F2E875] text-[#29281D]">
+                    <Building2 size={21} />
+                  </div>
+
+                  <div>
+                    <p className="text-xs text-[#858276]">
+                      Office information
+                    </p>
+                    <h3 className="mt-1 text-lg font-bold text-[#22221C]">
+                      Selected service
+                    </h3>
+                  </div>
+                </div>
+
+                <div className="mt-8 space-y-7">
+                  <div>
+                    <p className="text-xs text-[#858276]">
+                      Government office
+                    </p>
+                    <p className="mt-2 break-words text-base font-semibold text-[#25251F]">
+                      {office?.name || "Government Office"}
                     </p>
                   </div>
 
-                  <h2 className="mt-2 text-2xl font-bold tracking-tight text-[#15396B] sm:text-3xl">
-                    {service?.name || "Service Queue"}
+                  <div>
+                    <p className="text-xs text-[#858276]">
+                      Service name
+                    </p>
+                    <p className="mt-2 break-words text-base font-semibold text-[#25251F]">
+                      {service?.name || "Service Counter"}
+                    </p>
+                  </div>
+
+                  <div className="bg-[#F6F4E8] p-5">
+                    <div className="flex items-center gap-2 text-xs text-[#777365]">
+                      <Clock3 size={15} />
+                      Average service time
+                    </div>
+                    <p className="mt-3 text-3xl font-black tracking-tight text-[#22221C]">
+                      {avgTime}
+                      <span className="ml-2 text-xs font-medium tracking-normal text-[#777365]">
+                        minutes per service
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              </section>
+
+              {/* Process */}
+              <section className="bg-white p-6 sm:p-8">
+                <p className="text-xs text-[#858276]">
+                  A simple three-step process
+                </p>
+                <h3 className="mt-2 text-2xl font-black tracking-tight text-[#22221C]">
+                  What happens next?
+                </h3>
+
+                <div className="mt-6 space-y-2">
+                  {steps.map((step) => {
+                    const Icon = step.icon;
+
+                    return (
+                      <div
+                        key={step.number}
+                        className="flex items-center gap-4 px-2 py-4 transition-colors hover:bg-[#FAF9F3]"
+                      >
+                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[#F2E875] text-[#343223]">
+                          <Icon size={20} />
+                        </div>
+
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-bold text-[#292921]">
+                            {step.title}
+                          </p>
+                          <p className="mt-1 text-xs leading-5 text-[#858276]">
+                            {step.description}
+                          </p>
+                        </div>
+
+                        <span className="shrink-0 text-xs font-bold text-[#9A8F35]">
+                          {step.number}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            </div>
+
+            {/* Token CTA */}
+            <section className="mt-10 bg-[#EAE9E2] px-6 py-9 sm:px-9 sm:py-11 lg:px-12">
+              <div className="flex flex-col gap-7 sm:flex-row sm:items-center sm:justify-between">
+                <div className="max-w-xl">
+                  <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-[#77715A]">
+                    <Ticket size={15} />
+                    Your next step
+                  </div>
+
+                  <h2 className="mt-4 text-3xl font-black leading-[1.05] tracking-[-0.05em] text-[#171717] sm:text-4xl">
+                    YOUR TIME IS
+                    <br />
+                    TOO VALUABLE TO WAIT.
                   </h2>
 
-                  <p className="mt-2 text-sm text-slate-500">
-                    Current queue status for this government service
+                  <p className="mt-4 max-w-lg text-sm leading-7 text-[#6D6B61]">
+                    Get your virtual token and track your queue
+                    position before visiting the office.
                   </p>
                 </div>
 
-                <div className="inline-flex w-fit items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-bold text-emerald-700">
-                  <span className="relative flex h-2.5 w-2.5">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
-                    <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
-                  </span>
-                  Live
-                </div>
+                <button
+                  type="button"
+                  onClick={handleGenerateToken}
+                  disabled={generating || loading || !service}
+                  className="inline-flex min-h-12 shrink-0 items-center justify-center gap-3 self-start rounded-md bg-[#171717] px-6 py-4 text-sm font-bold text-white transition hover:bg-[#393830] disabled:cursor-not-allowed disabled:opacity-50 sm:self-center"
+                >
+                  {generating ? "Generating token..." : "Get virtual token"}
+                  {!generating && <ArrowRight size={17} />}
+                </button>
               </div>
+            </section>
 
-              {/* BIG QUEUE CARD */}
-              <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_20px_60px_-30px_rgba(15,23,42,0.25)]">
-                <div className="h-1.5 bg-gradient-to-r from-[#15396B] via-[#315B8E] to-[#F4B544]" />
-
-                <div className="p-5 sm:p-8">
-                  {/* Main stats */}
-                  <div className="grid gap-5 lg:grid-cols-[1.25fr_0.75fr]">
-                    {/* Estimated wait */}
-                    <div className="relative overflow-hidden rounded-[1.5rem] bg-[#15396B] p-7 sm:p-9">
-                      <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-amber-400/10 blur-2xl" />
-
-                      <div className="relative">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-sm font-semibold text-amber-200">
-                              Estimated waiting time
-                            </p>
-                            <p className="mt-1 text-xs text-slate-300">
-                              Based on the current queue
-                            </p>
-                          </div>
-
-                          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-xl">
-                            ⏱
-                          </div>
-                        </div>
-
-                        <div className="mt-8 flex items-end gap-3">
-                          <span className="text-6xl font-extrabold tracking-tight text-white sm:text-7xl">
-                            {estimatedWaitTime}
-                          </span>
-                          <span className="mb-2 text-lg font-semibold text-amber-200">
-                            minutes
-                          </span>
-                        </div>
-
-                        <div className="mt-7 flex items-center gap-2 text-sm font-medium text-slate-200">
-                          <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                          Queue is currently active
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* People waiting */}
-                    <div className="rounded-[1.5rem] border border-slate-200 bg-[#F7F8FA] p-7 sm:p-8">
-                      <p className="text-sm font-semibold text-slate-500">
-                        People waiting
-                      </p>
-
-                      <div className="mt-4 flex items-end justify-between">
-                        <span className="text-5xl font-extrabold tracking-tight text-[#15396B]">
-                          {peopleWaiting}
-                        </span>
-                        <span className="mb-2 rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-[#15396B]">
-                          In queue
-                        </span>
-                      </div>
-
-                      <div className="mt-7 h-2 overflow-hidden rounded-full bg-slate-200">
-                        <div
-                          className="h-full rounded-full bg-gradient-to-r from-[#15396B] to-[#F4B544]"
-                          style={{
-                            width: `${Math.min(
-                              100,
-                              Math.max(12, peopleWaiting * 6)
-                            )}%`,
-                          }}
-                        />
-                      </div>
-
-                      <p className="mt-3 text-xs text-slate-500">
-                        Current number of waiting tokens
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* INFORMATION CARDS */}
-                  <div className="mt-5 grid gap-4 sm:grid-cols-3">
-                    <div className="group rounded-2xl border border-slate-200 bg-white p-5 transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-slate-500">
-                          Currently serving
-                        </span>
-                        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-sm">
-                          🎟️
-                        </span>
-                      </div>
-                      <p className="mt-3 text-2xl font-bold text-[#15396B]">
-                        {currentServingToken}
-                      </p>
-                    </div>
-
-                    <div className="group rounded-2xl border border-slate-200 bg-white p-5 transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-slate-500">
-                          Service time
-                        </span>
-                        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-sm">
-                          ⏱️
-                        </span>
-                      </div>
-                      <p className="mt-3 text-2xl font-bold text-[#15396B]">
-                        {avgTime}
-                        <span className="ml-1 text-sm font-medium text-slate-400">
-                          min
-                        </span>
-                      </p>
-                    </div>
-
-                    <div className="group rounded-2xl border border-slate-200 bg-white p-5 transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-slate-500">
-                          Queue status
-                        </span>
-                        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50">
-                          <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
-                        </span>
-                      </div>
-                      <p className="mt-3 text-2xl font-bold text-emerald-600">
-                        Active
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* HOW IT WORKS */}
-                  <div className="mt-7 rounded-2xl border border-slate-200 bg-[#F7F8FA] p-5">
-                    <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-                      <div>
-                        <p className="text-sm font-bold text-[#15396B]">
-                          What happens next?
-                        </p>
-                        <p className="mt-1 text-xs text-slate-500">
-                          Join remotely and monitor your position.
-                        </p>
-                      </div>
-
-                      <div className="hidden h-px flex-1 bg-slate-200 sm:block" />
-
-                      <div className="flex flex-wrap gap-4">
-                        <div className="flex items-center gap-2 text-xs font-medium text-slate-600">
-                          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white font-bold text-[#15396B] shadow-sm">
-                            1
-                          </span>
-                          Get token
-                        </div>
-
-                        <div className="flex items-center gap-2 text-xs font-medium text-slate-600">
-                          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white font-bold text-[#15396B] shadow-sm">
-                            2
-                          </span>
-                          Track queue
-                        </div>
-
-                        <div className="flex items-center gap-2 text-xs font-medium text-slate-600">
-                          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white font-bold text-[#15396B] shadow-sm">
-                            3
-                          </span>
-                          Visit your counter
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* CALL TO ACTION */}
-                  <div className="mt-7 rounded-[1.5rem] bg-[#15396B] p-6 sm:p-7">
-                    <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-                      <div className="text-white">
-                        <p className="text-lg font-bold">
-                          Ready to skip the waiting room?
-                        </p>
-                        <p className="mt-1 text-sm text-slate-300">
-                          Get your virtual token and track your position
-                          from anywhere.
-                        </p>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={handleGenerateToken}
-                        disabled={generating}
-                        className="group inline-flex items-center justify-center gap-3 rounded-xl bg-[#F4B544] px-6 py-3.5 text-sm font-bold text-[#15396B] shadow-lg transition hover:-translate-y-0.5 hover:bg-amber-300 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-60"
-                      >
-                        {generating
-                          ? "Generating Token..."
-                          : "Get Virtual Token"}
-
-                        {!generating && (
-                          <span className="transition-transform group-hover:translate-x-1">
-                            →
-                          </span>
-                        )}
-                      </button>
-                    </div>
-                  </div>
-
-                  <p className="mt-4 text-center text-xs text-slate-500">
-                    Your token can be tracked in real time after joining
-                    the queue.
-                  </p>
-                </div>
-              </div>
-            </div>
+            <p className="mt-6 text-center text-xs leading-5 text-[#898679]">
+              Queue information is based on the latest data returned
+              by the server.
+            </p>
           </>
         )}
       </main>
 
-      <div className="h-10" />
+      {/* Footer */}
+      <footer className="mt-8 bg-[#EEEDE5]">
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-[#F2E875] text-xl font-black text-[#22221B]">
+                Q
+              </div>
+              <div>
+                <p className="text-sm font-extrabold tracking-tight text-[#24241D]">
+                  QueueLess
+                </p>
+                <p className="mt-1 text-xs text-[#858276]">
+                  Digital queue management
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2 text-sm text-[#77756B] sm:items-end">
+              <button
+                type="button"
+                onClick={() => navigate("/citizen")}
+                className="w-fit font-bold text-[#292921] transition hover:text-[#8A7D24]"
+              >
+                Citizen dashboard
+                <ArrowRight className="ml-2 inline" size={14} />
+              </button>
+              <p className="text-xs">
+                Serving citizens. Saving time.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-7 flex flex-col gap-2 text-[11px] text-[#898679] sm:flex-row sm:items-center sm:justify-between">
+            <p>
+              © {new Date().getFullYear()} QueueLess. All rights reserved.
+            </p>
+            <p>Digital services at your convenience.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

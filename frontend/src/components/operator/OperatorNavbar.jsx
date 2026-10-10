@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { logoutUser } from "../../services/authApi";
@@ -11,25 +12,44 @@ const NAV_ITEMS = [
 export default function OperatorNavbar({ user }) {
   const navigate = useNavigate();
   const { pathname } = useLocation();
+
   const [showAccount, setShowAccount] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const [logoutError, setLogoutError] = useState("");
 
-  // Close drawer with Escape
+  // Close the drawer when the current user changes.
+  useEffect(() => {
+    setShowAccount(false);
+    setLogoutError("");
+  }, [user?.id, user?._id, user?.email]);
+
+  // Support closing the drawer with Escape.
   useEffect(() => {
     if (!showAccount) return;
-    const onKey = (e) => e.key === "Escape" && setShowAccount(false);
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+
+    function handleKeyDown(event) {
+      if (event.key === "Escape") {
+        setShowAccount(false);
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
   }, [showAccount]);
 
   async function handleLogout() {
     if (loggingOut) return;
+
+    setLoggingOut(true);
+    setLogoutError("");
+
     try {
-      setLoggingOut(true);
-      setLogoutError("");
       await logoutUser();
-      navigate("/login");
+      setShowAccount(false);
+      navigate("/login", { replace: true });
     } catch (error) {
       console.error("Logout failed:", error);
       setLogoutError("Logout failed. Please try again.");
@@ -38,11 +58,16 @@ export default function OperatorNavbar({ user }) {
     }
   }
 
-  const displayName = user?.name || "Operator";
+  // Always read details from the latest user prop.
+  const displayName = user?.name?.trim() || user?.email || "Operator";
   const email = user?.email || "";
   const initial = displayName.charAt(0).toUpperCase();
 
-  const isActive = (path) => pathname === path;
+  const isActive = (path) =>
+    path === "/operator"
+      ? pathname === "/operator"
+      : pathname === path || pathname.startsWith(`${path}/`);
+
   const navClass = (path) =>
     `rounded-lg px-4 py-2 text-sm font-medium transition ${
       isActive(path)
@@ -63,6 +88,7 @@ export default function OperatorNavbar({ user }) {
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 text-sm font-bold text-white shadow-sm transition group-hover:shadow-md">
               Q
             </div>
+
             <span className="text-xl font-bold tracking-tight">
               <span className="text-slate-900">Queue</span>
               <span className="text-blue-600">Less</span>
@@ -70,7 +96,10 @@ export default function OperatorNavbar({ user }) {
           </button>
 
           {/* Desktop navigation */}
-          <nav className="hidden items-center gap-1 md:flex" aria-label="Operator navigation">
+          <nav
+            className="hidden items-center gap-1 md:flex"
+            aria-label="Operator navigation"
+          >
             {NAV_ITEMS.map((item) => (
               <button
                 key={item.path}
@@ -84,22 +113,27 @@ export default function OperatorNavbar({ user }) {
             ))}
           </nav>
 
-          {/* Account */}
+          {/* Account button */}
           <button
             type="button"
             onClick={() => setShowAccount(true)}
             aria-haspopup="dialog"
+            aria-expanded={showAccount}
             className="flex items-center gap-2 rounded-xl px-2 py-1.5 transition hover:bg-slate-100 sm:gap-3 sm:px-3"
           >
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-blue-100 to-purple-100 text-sm font-bold text-blue-600">
               {initial}
             </div>
+
             <div className="hidden text-left sm:block">
               <p className="max-w-32 truncate text-sm font-semibold text-slate-900">
                 {displayName}
               </p>
-              <p className="text-xs text-slate-500">Government Staff</p>
+              <p className="text-xs text-slate-500">
+                Government Staff
+              </p>
             </div>
+
             <span className="text-xs text-slate-400">▼</span>
           </button>
         </div>
@@ -107,7 +141,7 @@ export default function OperatorNavbar({ user }) {
         {/* Mobile navigation */}
         <nav
           className="flex gap-1 overflow-x-auto border-t border-slate-100 px-4 py-2 md:hidden"
-          aria-label="Operator navigation"
+          aria-label="Mobile operator navigation"
         >
           {NAV_ITEMS.map((item) => (
             <button
@@ -115,7 +149,9 @@ export default function OperatorNavbar({ user }) {
               type="button"
               onClick={() => navigate(item.path)}
               aria-current={isActive(item.path) ? "page" : undefined}
-              className={`flex-1 whitespace-nowrap text-center ${navClass(item.path)}`}
+              className={`flex-1 whitespace-nowrap text-center ${navClass(
+                item.path
+              )}`}
             >
               {item.label}
             </button>
@@ -123,27 +159,34 @@ export default function OperatorNavbar({ user }) {
         </nav>
       </header>
 
-      {/* Account Overlay */}
+      {/* Account overlay */}
       <div
-        className={`fixed inset-0 z-50 transition-all duration-300 ${
-          showAccount ? "visible bg-slate-900/30" : "invisible bg-transparent"
+        className={`fixed inset-0 z-50 transition-colors duration-300 ${
+          showAccount
+            ? "visible bg-slate-900/30"
+            : "invisible pointer-events-none bg-transparent"
         }`}
         onClick={() => setShowAccount(false)}
       >
+        {/* Account drawer */}
         <aside
           role="dialog"
-          aria-label="Account"
+          aria-modal={showAccount ? "true" : undefined}
+          aria-label="Operator account"
           onClick={(event) => event.stopPropagation()}
           className={`absolute right-0 top-0 flex h-full w-full max-w-sm flex-col bg-white shadow-2xl transition-transform duration-300 ease-out ${
             showAccount ? "translate-x-0" : "translate-x-full"
           }`}
         >
-          {/* Drawer Header */}
+          {/* Drawer header */}
           <div className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200 px-5">
             <div>
               <h2 className="font-bold text-slate-900">Account</h2>
-              <p className="text-xs text-slate-500">Manage your account</p>
+              <p className="text-xs text-slate-500">
+                Manage your account
+              </p>
             </div>
+
             <button
               type="button"
               onClick={() => setShowAccount(false)}
@@ -154,16 +197,22 @@ export default function OperatorNavbar({ user }) {
             </button>
           </div>
 
-          {/* Drawer Content */}
+          {/* Drawer content */}
           <div className="flex-1 overflow-y-auto p-5">
             <div className="rounded-2xl bg-gradient-to-br from-blue-50 to-purple-50 p-5">
               <div className="flex items-center gap-4">
                 <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-100 to-purple-100 text-lg font-bold text-blue-600">
                   {initial}
                 </div>
+
                 <div className="min-w-0">
-                  <h3 className="truncate text-lg font-bold text-slate-900">{displayName}</h3>
-                  <p className="truncate text-sm text-slate-500">{email}</p>
+                  <h3 className="truncate text-lg font-bold text-slate-900">
+                    {displayName}
+                  </h3>
+
+                  <p className="truncate text-sm text-slate-500">
+                    {email}
+                  </p>
                 </div>
               </div>
 
@@ -183,6 +232,15 @@ export default function OperatorNavbar({ user }) {
                 My Account
               </button>
 
+              {logoutError && (
+                <p
+                  role="alert"
+                  className="mt-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700"
+                >
+                  {logoutError}
+                </p>
+              )}
+
               <button
                 type="button"
                 onClick={handleLogout}
@@ -192,20 +250,14 @@ export default function OperatorNavbar({ user }) {
                 <span className="mr-3 text-lg">↪</span>
                 {loggingOut ? "Logging out..." : "Logout"}
               </button>
-
-              {logoutError && (
-                <p
-                  role="alert"
-                  className="mt-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700"
-                >
-                  {logoutError}
-                </p>
-              )}
             </div>
           </div>
 
+          {/* Drawer footer */}
           <div className="border-t border-slate-200 p-5">
-            <p className="text-center text-xs text-slate-400">QueueLess Operator Portal</p>
+            <p className="text-center text-xs text-slate-400">
+              QueueLess Operator Portal
+            </p>
           </div>
         </aside>
       </div>

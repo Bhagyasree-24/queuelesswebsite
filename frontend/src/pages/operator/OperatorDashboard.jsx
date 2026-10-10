@@ -1,206 +1,57 @@
+
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import OperatorNavbar from "../../components/operator/OperatorNavbar";
-
 import {
   getOperatorDashboard,
-  getOperatorQueue,
-  callNextToken,
-  startToken,
-  completeToken,
   updateCounterStatus,
 } from "../../services/operatorApi";
-
 import {
-  ActionButton,
-  BTN,
-  CounterStatusPill,
   ErrorState,
   Notice,
   PageSkeleton,
+  Spinner,
   TokenStatusBadge,
   counterStyle,
-  formatTime,
-  getId,
 } from "../../components/operator/OperatorUi";
 
-function greeting() {
-  const h = new Date().getHours();
+const STATUS_OPTIONS = [
+  {
+    value: "AVAILABLE",
+    label: "Available",
+    desc: "Ready to call and serve citizens.",
+    dot: "bg-emerald-500",
+    selected: "border-emerald-300 bg-emerald-50 ring-2 ring-emerald-100",
+  },
+  {
+    value: "PAUSED",
+    label: "Paused",
+    desc: "Temporary break. No new tokens can be called.",
+    dot: "bg-amber-500",
+    selected: "border-amber-300 bg-amber-50 ring-2 ring-amber-100",
+  },
+  {
+    value: "OFFLINE",
+    label: "Offline",
+    desc: "Counter closed. No new tokens can be called.",
+    dot: "bg-slate-400",
+    selected: "border-slate-400 bg-slate-100 ring-2 ring-slate-200",
+  },
+];
 
-  if (h < 12) return "Good morning";
-  if (h < 17) return "Good afternoon";
-
-  return "Good evening";
-}
-
-/* -------------------------------------------------------
-   Small visual icons
-------------------------------------------------------- */
-
-function BuildingIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      className="h-6 w-6"
-    >
-      <path d="M3 21h18" />
-      <path d="M5 21V8l7-5 7 5v13" />
-      <path d="M9 21v-4h6v4" />
-      <path d="M8 10h1" />
-      <path d="M15 10h1" />
-      <path d="M8 13h1" />
-      <path d="M15 13h1" />
-    </svg>
-  );
-}
-
-function UsersIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      className="h-6 w-6"
-    >
-      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-      <circle cx="9" cy="7" r="4" />
-      <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-    </svg>
-  );
-}
-
-function TicketIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      className="h-6 w-6"
-    >
-      <path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3a2 2 0 0 0 0-4V7Z" />
-      <path d="M13 8v2" />
-      <path d="M13 14v2" />
-    </svg>
-  );
-}
-
-function MonitorIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      className="h-6 w-6"
-    >
-      <rect x="3" y="4" width="18" height="13" rx="2" />
-      <path d="M8 21h8" />
-      <path d="M12 17v4" />
-    </svg>
-  );
-}
-
-function QueueIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      className="h-6 w-6"
-    >
-      <path d="M4 6h16" />
-      <path d="M4 12h16" />
-      <path d="M4 18h10" />
-    </svg>
-  );
-}
-
-function ArrowRightIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      className="h-4 w-4"
-    >
-      <path d="M5 12h14" />
-      <path d="m13 6 6 6-6 6" />
-    </svg>
-  );
-}
-
-function PauseIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      className="h-5 w-5"
-    >
-      <path d="M8 5v14" />
-      <path d="M16 5v14" />
-    </svg>
-  );
-}
-
-function PlayIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      className="h-5 w-5"
-    >
-      <path d="M8 5v14l11-7L8 5Z" />
-    </svg>
-  );
-}
-
-function CheckIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-      className="h-5 w-5"
-    >
-      <path d="m5 12 4 4L19 6" />
-    </svg>
-  );
-}
-
-/* -------------------------------------------------------
-   Main Dashboard
-------------------------------------------------------- */
-
-export default function OperatorDashboard({ user }) {
+export default function CounterControl({ user }) {
   const navigate = useNavigate();
 
   const [dashboard, setDashboard] = useState(null);
-  const [queue, setQueue] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [busy, setBusy] = useState(null);
+  const [busyStatus, setBusyStatus] = useState(null);
   const [notice, setNotice] = useState(null);
 
   const load = useCallback(async () => {
     try {
-      const [dash, q] = await Promise.all([
-        getOperatorDashboard(),
-        getOperatorQueue(),
-      ]);
-
-      setDashboard(dash.dashboard);
-      setQueue(q.queue || []);
+      const data = await getOperatorDashboard();
+      setDashboard(data.dashboard);
       setError("");
     } catch (err) {
       setError(err.message || "Something went wrong.");
@@ -213,896 +64,695 @@ export default function OperatorDashboard({ user }) {
     load();
   }, [load]);
 
-  async function runAction(key, fn, successFallback) {
-    if (busy) return;
+  async function changeStatus(status) {
+    if (busyStatus || status === dashboard?.counter?.status) return;
 
-    setBusy(key);
+    setBusyStatus(status);
     setNotice(null);
 
     try {
-      const res = await fn();
+      const res = await updateCounterStatus(status);
 
-      if (res && res.success === false) {
-        setNotice({
-          type: "info",
-          message: res.message || "Nothing to do.",
-        });
-      } else {
-        setNotice({
-          type: "success",
-          message: res?.message || successFallback,
-        });
-      }
+      setNotice({
+        type: "success",
+        message: res?.message || "Counter status updated.",
+      });
 
       await load();
     } catch (err) {
       setNotice({
         type: "error",
-        message: err.message,
+        message: err.message || "Unable to update counter status.",
       });
-
-      await load();
     } finally {
-      setBusy(null);
+      setBusyStatus(null);
     }
   }
 
-  const operator = dashboard?.operator;
-  const office = dashboard?.office;
   const counter = dashboard?.counter;
+  const office = dashboard?.office;
   const currentToken = dashboard?.currentToken;
-
-  const currentId = getId(currentToken);
-
-  const waiting = queue.filter((t) => t.status === "WAITING");
-
-  const counterStatus = counter?.status;
 
   const counterName =
     counter?.name ||
     (counter?.number ? `Counter ${counter.number}` : "Counter");
 
-  const operatorName =
-    operator?.name ||
-    user?.name ||
-    "Operator";
+  const style = counterStyle(counter?.status);
 
-  const isAvailable = counterStatus === "AVAILABLE";
-
-  const statusStyle = counterStyle(counterStatus);
-
-  const stats = [
-    {
-      label: "People Waiting",
-      value: dashboard?.waitingCount ?? waiting.length,
-      description: "Citizens waiting in queue",
-      icon: <UsersIcon />,
-    },
-    {
-      label: "Current Token",
-      value: currentToken?.tokenNumber || "—",
-      description: currentToken
-        ? `${currentToken.status.toLowerCase()} at counter`
-        : "No active token",
-      icon: <TicketIcon />,
-    },
-    {
-      label: "Counter Status",
-      value: statusStyle.label,
-      description: counterName,
-      icon: <MonitorIcon />,
-    },
-    {
-      label: "Active Tokens",
-      value: queue.length,
-      description: "Waiting, called or serving",
-      icon: <QueueIcon />,
-    },
-  ];
+  const currentStatus =
+    STATUS_OPTIONS.find((item) => item.value === counter?.status) ||
+    STATUS_OPTIONS[0];
 
   return (
-    <div className="min-h-screen bg-[#f4f8f8] text-slate-900">
+    <div className="min-h-screen bg-white text-[#151515]">
+      <OperatorNavbar user={user} />
 
-      <OperatorNavbar user={user || operator} />
+      <main>
+        {/* HERO — editorial style inspired by the reference image */}
+        <section className="px-3 pb-8 pt-4 sm:px-6 sm:pb-12 sm:pt-6 lg:px-8">
+          <div className="relative mx-auto max-w-7xl overflow-hidden rounded-xl bg-[#F3F3F1]">
+            <div className="absolute inset-y-0 right-0 hidden w-[42%] bg-[#F0D96A] lg:block" />
 
-      {/* =====================================================
-          PREMIUM HEADER / HERO
-      ===================================================== */}
-
-      <section className="relative overflow-hidden bg-[#073d3b]">
-
-        {/* Background decorative shapes */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -left-32 -top-40 h-[420px] w-[420px] rounded-full bg-teal-400/10 blur-3xl" />
-          <div className="absolute right-0 top-0 h-[500px] w-[500px] rounded-full bg-blue-500/10 blur-3xl" />
-          <div className="absolute bottom-[-180px] left-[35%] h-[400px] w-[400px] rounded-full bg-cyan-400/10 blur-3xl" />
-        </div>
-
-        <div className="relative mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-12">
-
-          {/* Portal badge */}
-          <div className="inline-flex items-center gap-2 rounded-full border border-teal-300/30 bg-teal-300/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-teal-200">
-            <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.8)]" />
-            Operator Control Portal
-          </div>
-
-          <div className="mt-7 grid gap-8 lg:grid-cols-[1.25fr_0.75fr] lg:items-end">
-
-            {/* Hero text */}
-            <div>
-              <p className="text-sm font-semibold text-teal-200">
-                {office?.name || "Government Service Office"}
-              </p>
-
-              <h1 className="mt-3 max-w-3xl text-4xl font-black leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-6xl">
-                {greeting()},
-                <span className="block text-teal-300">
-                  {operatorName}.
-                </span>
-              </h1>
-
-              <p className="mt-5 max-w-2xl text-base leading-7 text-slate-200 sm:text-lg">
-                Manage your service counter, call citizens and keep the
-                government queue moving smoothly.
-              </p>
-
-              {/* Live indicator */}
-              <div className="mt-7 flex flex-wrap items-center gap-3">
-
-                <div className="inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-400/10 px-4 py-2 text-sm font-semibold text-emerald-200">
-                  <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
-                  Queue system live
+            <div className="relative grid min-h-[410px] lg:grid-cols-[1.15fr_0.85fr]">
+              <div className="flex flex-col justify-center px-5 py-9 sm:px-10 sm:py-12 lg:px-14 lg:py-14">
+                <div className="inline-flex w-fit items-center gap-2 rounded-full border border-black/10 bg-white px-3 py-1.5">
+                  <span className="h-2 w-2 rounded-full bg-[#F0D96A]" />
+                  <span className="text-[9px] font-extrabold uppercase tracking-[0.15em]">
+                    Official operator portal
+                  </span>
                 </div>
 
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-slate-200">
-                  <MonitorIcon />
-                  {counterName}
-                </div>
-
-              </div>
-            </div>
-
-            {/* Status card */}
-            <div className="rounded-3xl border border-white/10 bg-white/10 p-5 shadow-2xl backdrop-blur-xl">
-
-              <div className="flex items-start justify-between gap-4">
-
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-300">
-                    Counter status
-                  </p>
-
-                  <h2 className="mt-2 text-2xl font-bold text-white">
-                    {counterName}
-                  </h2>
-                </div>
-
-                <CounterStatusPill status={counterStatus} />
-              </div>
-
-              <div className="mt-5 border-t border-white/10 pt-5">
-
-                <p className="text-xs uppercase tracking-wider text-slate-400">
-                  Citizens waiting
+                <p className="mt-7 text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#15396B]">
+                  Your service. Your responsibility.
                 </p>
 
-                <div className="mt-1 flex items-end justify-between">
-                  <p className="text-5xl font-black text-white">
-                    {dashboard?.waitingCount ?? waiting.length}
-                  </p>
+                <h1 className="mt-3 max-w-2xl text-5xl font-black uppercase leading-[0.88] tracking-[-0.055em] sm:text-6xl lg:text-7xl">
+                  Manage
+                  <br />
+                  your counter.
+                  <br />
+                  <span className="relative z-0 inline-block">
+                    <span className="absolute inset-x-0 bottom-1 -z-10 h-[72%] -rotate-1 bg-[#F0D96A]" />
+                    Serve smarter.
+                  </span>
+                </h1>
 
-                  <div className="flex items-center gap-2 pb-2 text-sm font-semibold text-emerald-300">
-                    <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                    Live
+                <p className="mt-6 max-w-md text-sm leading-6 text-slate-600">
+                  Control your counter availability, check the current token,
+                  and help citizens complete their government services with
+                  less waiting.
+                </p>
+
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      document
+                        .getElementById("counter-status")
+                        ?.scrollIntoView({ behavior: "smooth" })
+                    }
+                    className="inline-flex items-center gap-3 rounded-md bg-[#151515] px-5 py-3 text-xs font-extrabold uppercase tracking-wide text-white transition hover:bg-[#15396B]"
+                  >
+                    Manage counter
+                    <span className="text-base">→</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => navigate("/operator/queue")}
+                    className="inline-flex items-center gap-2 rounded-md border border-black/15 bg-white px-5 py-3 text-xs font-extrabold uppercase tracking-wide text-[#151515] transition hover:border-[#15396B] hover:text-[#15396B]"
+                  >
+                    View queue ↗
+                  </button>
+                </div>
+
+                <div className="mt-7 flex flex-wrap gap-x-5 gap-y-2 text-[10px] font-bold uppercase tracking-wide text-slate-500">
+                  <span>✓ Live queue</span>
+                  <span>✓ Status control</span>
+                  <span>✓ Citizen service</span>
+                </div>
+              </div>
+
+              {/* Counter preview */}
+              <div className="relative flex min-h-[300px] items-center justify-center overflow-hidden px-5 py-10 sm:px-10 lg:min-h-full">
+                <div className="absolute right-[-70px] top-[-60px] h-72 w-72 rounded-full border-[35px] border-white/35" />
+                <div className="absolute bottom-[-110px] left-[-20px] h-72 w-72 rounded-full bg-[#15396B]/10" />
+
+                <div className="relative w-full max-w-sm">
+                  <div className="absolute -right-2 -top-2 h-12 w-12 border-r-4 border-t-4 border-[#15396B] sm:-right-3 sm:-top-3" />
+
+                  <div className="relative rounded-lg bg-white p-5 shadow-xl sm:p-7">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <p className="text-[9px] font-extrabold uppercase tracking-[0.16em] text-slate-400">
+                          Counter overview
+                        </p>
+                        <h2 className="mt-2 break-words text-2xl font-black uppercase leading-tight tracking-tight text-[#15396B]">
+                          {counterName}
+                        </h2>
+                      </div>
+
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-[#F0D96A] text-xl">
+                        🏛️
+                      </div>
+                    </div>
+
+                    <div className="mt-5 border-y border-slate-100 py-4">
+                      <p className="text-[9px] font-extrabold uppercase tracking-widest text-slate-400">
+                        Assigned office
+                      </p>
+                      <p className="mt-1 truncate text-sm font-bold text-slate-800">
+                        {office?.name || "Government Office"}
+                      </p>
+                    </div>
+
+                    <div className="mt-4 grid grid-cols-2 gap-3">
+                      <div className="bg-[#F5F5F3] p-4">
+                        <p className="text-[9px] font-extrabold uppercase tracking-wide text-slate-500">
+                          Waiting
+                        </p>
+                        <p className="mt-2 text-3xl font-black text-[#15396B]">
+                          {loading ? "—" : dashboard?.waitingCount ?? 0}
+                        </p>
+                      </div>
+
+                      <div className="bg-[#FFF8D8] p-4">
+                        <p className="text-[9px] font-extrabold uppercase tracking-wide text-slate-500">
+                          Now serving
+                        </p>
+                        <p className="mt-2 truncate text-2xl font-black text-[#15396B]">
+                          {currentToken?.tokenNumber || "—"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 flex items-center justify-between gap-3 bg-[#15396B] px-4 py-3 text-white">
+                      <div>
+                        <p className="text-[9px] font-bold uppercase tracking-widest text-blue-200">
+                          Counter status
+                        </p>
+                        <p className="mt-1 text-sm font-extrabold">
+                          {loading ? "Loading..." : currentStatus.label}
+                        </p>
+                      </div>
+                      <span
+                        className={`h-3 w-3 shrink-0 rounded-full ${currentStatus.dot}`}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mt-3 flex items-center justify-between text-[9px] font-extrabold uppercase tracking-widest text-[#15396B]">
+                    <span>QueueLess operator desk</span>
+                    <span>Service in progress</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Yellow category strip */}
+        <div className="bg-[#F0D96A]">
+          <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-5 gap-y-3 px-4 py-4 text-[9px] font-black uppercase tracking-wider text-[#292719] sm:px-6 lg:px-8">
+            <span>▪ Counter availability</span>
+            <span>▪ Queue overview</span>
+            <span>▪ Token information</span>
+            <span>▪ Public service</span>
+            <span>▪ Secure operator access</span>
+          </div>
+        </div>
+
+        {/* MAIN CONTENT */}
+        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
+          <div className="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#15396B]">
+                Your operator workspace
+              </p>
+              <h2 className="mt-2 text-4xl font-black uppercase leading-[0.95] tracking-[-0.04em] text-[#151515] sm:text-5xl">
+                Your counter.
+                <br />
+                Your control.
+              </h2>
+              <div className="mt-3 h-2 w-32 -rotate-1 bg-[#F0D96A]" />
+              <p className="mt-4 max-w-xl text-sm leading-6 text-slate-500">
+                Review your assignment, monitor the queue, and keep your
+                service availability up to date.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setLoading(true);
+                load();
+              }}
+              disabled={loading}
+              className="inline-flex items-center justify-center gap-2 self-start rounded-md border border-slate-200 bg-white px-4 py-3 text-xs font-extrabold uppercase tracking-wide text-[#15396B] transition hover:border-[#F0D96A] hover:bg-[#FFFBEA] disabled:cursor-not-allowed disabled:opacity-60 sm:self-auto"
+            >
+              <span className={loading ? "animate-spin" : ""}>↻</span>
+              Refresh details
+            </button>
+          </div>
+
+          <Notice notice={notice} onClose={() => setNotice(null)} />
+
+          {loading ? (
+            <div className="mt-6 border border-slate-200 bg-white p-5 sm:p-7">
+              <PageSkeleton />
+            </div>
+          ) : error && !dashboard ? (
+            <div className="mt-6 border border-slate-200 bg-white p-5 sm:p-7">
+              <ErrorState
+                message={error}
+                onRetry={() => {
+                  setLoading(true);
+                  load();
+                }}
+              />
+            </div>
+          ) : (
+            <>
+              {/* Statistics */}
+              <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                <div className="border border-slate-200 bg-white p-5 transition hover:-translate-y-1 hover:shadow-md">
+                  <div className="flex items-center justify-between">
+                    <span className="text-2xl">🏛️</span>
+                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">
+                      Assignment
+                    </span>
+                  </div>
+                  <p className="mt-5 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                    Your counter
+                  </p>
+                  <p className="mt-1 truncate text-xl font-black text-[#15396B]">
+                    {counterName}
+                  </p>
+                  <p className="mt-2 truncate text-xs text-slate-500">
+                    {office?.name || "Government Office"}
+                  </p>
+                </div>
+
+                <div className="border border-slate-200 bg-white p-5 transition hover:-translate-y-1 hover:shadow-md">
+                  <div className="flex items-center justify-between">
+                    <span className="text-2xl">👥</span>
+                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">
+                      Queue
+                    </span>
+                  </div>
+                  <p className="mt-5 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                    People waiting
+                  </p>
+                  <p className="mt-1 text-3xl font-black text-[#15396B]">
+                    {dashboard?.waitingCount ?? 0}
+                  </p>
+                  <p className="mt-2 text-xs text-slate-500">
+                    Citizens awaiting service
+                  </p>
+                </div>
+
+                <div className="border border-slate-200 bg-white p-5 transition hover:-translate-y-1 hover:shadow-md">
+                  <div className="flex items-center justify-between">
+                    <span className="text-2xl">🎫</span>
+                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">
+                      Live token
+                    </span>
+                  </div>
+                  <p className="mt-5 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                    Now serving
+                  </p>
+                  <p className="mt-1 truncate text-3xl font-black text-emerald-700">
+                    {currentToken?.tokenNumber || "—"}
+                  </p>
+                  <p className="mt-2 text-xs text-slate-500">
+                    Currently assigned token
+                  </p>
+                </div>
+
+                <div className="border border-slate-200 bg-white p-5 transition hover:-translate-y-1 hover:shadow-md">
+                  <div className="flex items-center justify-between">
+                    <span className="text-2xl">◉</span>
+                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">
+                      Availability
+                    </span>
+                  </div>
+                  <p className="mt-5 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                    Counter status
+                  </p>
+                  <div className="mt-2 flex items-center gap-2">
+                    <span
+                      className={`h-2.5 w-2.5 rounded-full ${currentStatus.dot}`}
+                    />
+                    <p className="text-xl font-black text-[#15396B]">
+                      {currentStatus.label}
+                    </p>
+                  </div>
+                  <p className="mt-2 text-xs text-slate-500">
+                    Current service availability
+                  </p>
+                </div>
+              </section>
+
+              {/* Status control and details */}
+              <section className="mt-10 grid items-start gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+                <div
+                  id="counter-status"
+                  className="border border-slate-200 bg-white"
+                >
+                  <div className="border-b border-slate-100 px-5 py-6 sm:px-7">
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#15396B]">
+                      Control panel / 01
+                    </p>
+                    <h2 className="mt-2 text-3xl font-black uppercase leading-tight tracking-tight text-[#151515] sm:text-4xl">
+                      Set your status.
+                    </h2>
+                    <div className="mt-3 h-2 w-24 -rotate-1 bg-[#F0D96A]" />
+                    <p className="mt-4 text-sm leading-6 text-slate-500">
+                      Choose whether your counter is ready to receive and
+                      serve citizens.
+                    </p>
+                  </div>
+
+                  <div className="p-5 sm:p-7">
+                    <div className={`p-4 ${style.box}`}>
+                      <div className="flex items-start gap-3">
+                        <span
+                          className={`mt-1 h-3 w-3 shrink-0 rounded-full ${style.dot}`}
+                        />
+                        <div>
+                          <p className={`font-extrabold ${style.text}`}>
+                            Counter is {style.label}
+                          </p>
+                          <p className={`mt-1 text-sm leading-5 ${style.text}`}>
+                            {counter?.status === "AVAILABLE"
+                              ? "Your counter is ready to call and serve citizens."
+                              : "Your counter is not currently available to call new tokens."}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-5 space-y-3">
+                      {STATUS_OPTIONS.map((opt) => {
+                        const selected = counter?.status === opt.value;
+                        const isBusy = busyStatus === opt.value;
+
+                        return (
+                          <button
+                            key={opt.value}
+                            type="button"
+                            disabled={!!busyStatus || selected}
+                            aria-pressed={selected}
+                            onClick={() => changeStatus(opt.value)}
+                            className={`group flex w-full items-center gap-4 border p-4 text-left transition duration-200 ${
+                              selected
+                                ? `${opt.selected} shadow-sm`
+                                : "border-slate-200 bg-white hover:-translate-y-0.5 hover:border-[#F0D96A] hover:bg-[#FFFCF0] hover:shadow-sm disabled:opacity-60"
+                            } disabled:cursor-not-allowed`}
+                          >
+                            <span
+                              className={`h-3 w-3 shrink-0 rounded-full ${opt.dot}`}
+                            />
+
+                            <div className="min-w-0 flex-1">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <p className="font-extrabold text-slate-900">
+                                  {opt.label}
+                                </p>
+                                {selected && (
+                                  <span className="bg-white px-2 py-1 text-[9px] font-black uppercase tracking-wider text-slate-500 shadow-sm">
+                                    Current
+                                  </span>
+                                )}
+                              </div>
+                              <p className="mt-1 text-xs leading-5 text-slate-500">
+                                {opt.desc}
+                              </p>
+                            </div>
+
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center bg-[#F7F8FA] text-slate-500 transition group-hover:bg-[#F0D96A] group-hover:text-[#15396B]">
+                              {isBusy ? (
+                                <Spinner />
+                              ) : selected ? (
+                                <span className="font-black">✓</span>
+                              ) : (
+                                <span className="text-lg">→</span>
+                              )}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <div className="mt-5 bg-[#F7F8FA] p-4">
+                      <p className="text-xs leading-5 text-slate-500">
+                        <span className="font-extrabold text-[#15396B]">
+                          Please note:
+                        </span>{" "}
+                        Update your status when starting work, taking a break,
+                        or closing your counter.
+                      </p>
+                    </div>
                   </div>
                 </div>
 
+                <div className="space-y-6">
+                  {/* Assignment details */}
+                  <div className="border border-slate-200 bg-white">
+                    <div className="border-b border-slate-100 px-5 py-6 sm:px-6">
+                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#15396B]">
+                        Counter details / 02
+                      </p>
+                      <h2 className="mt-2 text-2xl font-black uppercase text-[#151515]">
+                        Your assignment.
+                      </h2>
+                    </div>
+
+                    <dl className="divide-y divide-slate-100 px-5 sm:px-6">
+                      <div className="flex items-start justify-between gap-4 py-4">
+                        <dt className="text-sm text-slate-500">
+                          Counter name
+                        </dt>
+                        <dd className="max-w-[60%] text-right text-sm font-extrabold text-slate-900">
+                          {counterName}
+                        </dd>
+                      </div>
+
+                      {counter?.number != null && (
+                        <div className="flex items-center justify-between gap-4 py-4">
+                          <dt className="text-sm text-slate-500">
+                            Counter number
+                          </dt>
+                          <dd className="text-sm font-extrabold text-slate-900">
+                            {counter.number}
+                          </dd>
+                        </div>
+                      )}
+
+                      <div className="flex items-start justify-between gap-4 py-4">
+                        <dt className="text-sm text-slate-500">Office</dt>
+                        <dd className="max-w-[60%] text-right text-sm font-extrabold text-slate-900">
+                          {office?.name || "—"}
+                        </dd>
+                      </div>
+
+                      <div className="flex items-center justify-between gap-4 py-4">
+                        <dt className="text-sm text-slate-500">
+                          People waiting
+                        </dt>
+                        <dd className="text-sm font-extrabold text-[#15396B]">
+                          {dashboard?.waitingCount ?? 0}
+                        </dd>
+                      </div>
+                    </dl>
+                  </div>
+
+                  {/* Current token */}
+                  <div className="border border-slate-200 bg-white">
+                    <div className="border-b border-slate-100 px-5 py-5 sm:px-6">
+                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#15396B]">
+                        Live queue / 03
+                      </p>
+                      <h2 className="mt-2 text-2xl font-black uppercase text-[#151515]">
+                        Now serving.
+                      </h2>
+                    </div>
+
+                    <div className="p-5 sm:p-6">
+                      {currentToken ? (
+                        <div className="bg-[#15396B] p-5 text-white">
+                          <div className="flex items-center justify-between gap-3">
+                            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-blue-200">
+                              Current token
+                            </p>
+                            <span className="flex items-center gap-1.5 bg-white/10 px-3 py-1.5 text-[10px] font-bold text-white">
+                              <span className="h-2 w-2 rounded-full bg-[#F0D96A]" />
+                              Active
+                            </span>
+                          </div>
+
+                          <p className="mt-3 break-words text-4xl font-black tracking-tight text-[#F0D96A] sm:text-5xl">
+                            {currentToken.tokenNumber || "—"}
+                          </p>
+
+                          <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-white/15 pt-4">
+                            <p className="text-xs text-blue-100">
+                              {currentToken.serviceId?.name || "Current service"}
+                            </p>
+                            <TokenStatusBadge status={currentToken.status} />
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="border border-dashed border-slate-200 bg-[#F7F8FA] px-5 py-8 text-center">
+                          <div className="mx-auto flex h-12 w-12 items-center justify-center bg-white text-2xl shadow-sm">
+                            🎫
+                          </div>
+                          <h3 className="mt-4 font-extrabold text-[#15396B]">
+                            No active token
+                          </h3>
+                          <p className="mx-auto mt-2 max-w-xs text-xs leading-5 text-slate-500">
+                            There is no currently assigned token at your
+                            counter.
+                          </p>
+                        </div>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={() => navigate("/operator/queue")}
+                        className="mt-4 flex w-full items-center justify-center gap-2 border border-slate-200 bg-white px-4 py-3 text-xs font-extrabold uppercase tracking-wide text-[#15396B] transition hover:border-[#F0D96A] hover:bg-[#FFFCF0]"
+                      >
+                        Open queue management <span>→</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* Service banner inspired by the reference image */}
+              <section className="mt-10 overflow-hidden bg-[#F0D96A]">
+                <div className="grid lg:grid-cols-[0.8fr_1.2fr]">
+                  <div className="relative flex min-h-56 items-center justify-center overflow-hidden bg-[#15396B] p-8">
+                    <div className="absolute -left-12 -top-12 h-48 w-48 rounded-full border border-white/15" />
+                    <div className="absolute -bottom-20 -right-8 h-56 w-56 rounded-full border-[28px] border-white/10" />
+
+                    <div className="relative text-center">
+                      <div className="mx-auto flex h-16 w-16 items-center justify-center bg-white/10 text-3xl">
+                        🏛️
+                      </div>
+                      <p className="mt-4 text-[10px] font-black uppercase tracking-[0.2em] text-[#F0D96A]">
+                        Public service
+                      </p>
+                      <p className="mt-1 text-xl font-black uppercase text-white">
+                        Starts with you.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col justify-center p-6 sm:p-9 lg:p-12">
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#15396B]">
+                      Every citizen counts
+                    </p>
+
+                    <h2 className="mt-3 max-w-xl text-4xl font-black uppercase leading-[0.9] tracking-[-0.04em] text-[#151515] sm:text-5xl">
+                      Better service.
+                      <br />
+                      Less waiting.
+                    </h2>
+
+                    <p className="mt-4 max-w-xl text-sm leading-6 text-[#263B4D]">
+                      Keep your counter status updated and help make every
+                      government office visit a better experience.
+                    </p>
+
+                    <button
+                      type="button"
+                      onClick={() => navigate("/operator/queue")}
+                      className="mt-6 inline-flex w-fit items-center justify-center gap-3 bg-[#151515] px-5 py-3 text-xs font-extrabold uppercase tracking-wide text-white transition hover:bg-[#15396B]"
+                    >
+                      Go to queue management <span>→</span>
+                    </button>
+                  </div>
+                </div>
+              </section>
+            </>
+          )}
+        </div>
+      </main>
+
+      {/* FOOTER */}
+      <footer className="border-t border-slate-200 bg-white">
+        <div className="h-1.5 bg-[#F0D96A]" />
+
+        <div className="mx-auto max-w-7xl px-4 py-9 sm:px-6 lg:px-8">
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-[1.3fr_0.7fr_0.8fr]">
+            {/* Brand */}
+            <div>
+              <a
+                href="#top"
+                onClick={(event) => {
+                  event.preventDefault();
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+                className="inline-flex items-center gap-2"
+              >
+                <span className="flex h-9 w-9 items-center justify-center bg-[#F0D96A] text-lg">
+                  🏛️
+                </span>
+                <span className="text-lg font-black tracking-tight text-[#15396B]">
+                  QUEUELESS
+                </span>
+              </a>
+
+              <p className="mt-4 max-w-sm text-sm leading-6 text-slate-500">
+                Making government services simpler with digital queues,
+                smarter counter management, and a better citizen experience.
+              </p>
+
+              <div className="mt-4 inline-flex items-center gap-2 bg-[#F7F8FA] px-3 py-2 text-[10px] font-extrabold uppercase tracking-wide text-[#15396B]">
+                <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                Operator portal
               </div>
             </div>
 
-          </div>
-        </div>
-      </section>
+            {/* Quick links */}
+            <div>
+              <h3 className="text-[10px] font-black uppercase tracking-[0.18em] text-[#15396B]">
+                Quick links
+              </h3>
 
-      {/* =====================================================
-          MAIN CONTENT
-      ===================================================== */}
-
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-
-        <Notice
-          notice={notice}
-          onClose={() => setNotice(null)}
-        />
-
-        {loading ? (
-
-          <PageSkeleton />
-
-        ) : error && !dashboard ? (
-
-          <ErrorState
-            message={error}
-            onRetry={() => {
-              setLoading(true);
-              load();
-            }}
-          />
-
-        ) : (
-
-          <>
-
-            {error && (
-              <div className="mb-6 flex items-center justify-between rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">
-                <span>
-                  Couldn't refresh: {error}
-                </span>
-
+              <div className="mt-4 flex flex-col items-start gap-3 text-sm text-slate-500">
                 <button
                   type="button"
-                  onClick={load}
-                  className="font-bold underline"
+                  onClick={() => navigate("/operator/queue")}
+                  className="transition hover:text-[#15396B]"
                 >
-                  Retry
+                  Queue management →
                 </button>
-              </div>
-            )}
-
-            {/* =================================================
-                STAT CARDS
-            ================================================= */}
-
-            <section className="-mt-1 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-
-              {stats.map((stat) => (
-                <div
-                  key={stat.label}
-                  className="group rounded-2xl border border-slate-200/80 bg-white p-5 shadow-[0_8px_30px_rgba(15,23,42,0.05)] transition duration-300 hover:-translate-y-1 hover:shadow-xl"
-                >
-
-                  <div className="flex items-start justify-between">
-
-                    <div>
-                      <p className="text-sm font-medium text-slate-500">
-                        {stat.label}
-                      </p>
-
-                      <p className="mt-2 text-3xl font-black tracking-tight text-slate-900">
-                        {stat.value}
-                      </p>
-                    </div>
-
-                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-teal-50 to-blue-50 text-teal-700 transition group-hover:scale-105">
-                      {stat.icon}
-                    </div>
-
-                  </div>
-
-                  <p className="mt-3 text-xs text-slate-500">
-                    {stat.description}
-                  </p>
-
-                </div>
-              ))}
-
-            </section>
-
-            {/* =================================================
-                CURRENT TOKEN + QUICK ACTIONS
-            ================================================= */}
-
-            <section className="mt-6 grid gap-6 lg:grid-cols-[1.55fr_0.75fr]">
-
-              {/* CURRENT TOKEN */}
-              <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_10px_40px_rgba(15,23,42,0.06)]">
-
-                {/* Card header */}
-                <div className="flex flex-col gap-4 border-b border-slate-100 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-7">
-
-                  <div>
-                    <div className="flex items-center gap-2">
-
-                      <span className="h-2.5 w-2.5 rounded-full bg-teal-500" />
-
-                      <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">
-                        Active Service
-                      </p>
-
-                    </div>
-
-                    <h2 className="mt-2 text-2xl font-black text-slate-900">
-                      Current Token
-                    </h2>
-
-                    <p className="mt-1 text-sm text-slate-500">
-                      Token currently assigned to your counter
-                    </p>
-                  </div>
-
-                  {currentToken && (
-                    <TokenStatusBadge
-                      status={currentToken.status}
-                    />
-                  )}
-
-                </div>
-
-                {/* Token body */}
-                {currentToken ? (
-
-                  <div className="p-6 sm:p-7">
-
-                    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#073d3b] via-[#075e5a] to-[#075985] p-6 text-white shadow-xl sm:p-8">
-
-                      {/* decorative */}
-                      <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-teal-300/10" />
-                      <div className="absolute -bottom-20 left-1/3 h-52 w-52 rounded-full bg-blue-300/10" />
-
-                      <div className="relative grid gap-8 md:grid-cols-[0.85fr_1.15fr] md:items-center">
-
-                        {/* Token number */}
-                        <div>
-
-                          <p className="text-sm font-medium text-teal-200">
-                            NOW SERVING
-                          </p>
-
-                          <p className="mt-2 text-7xl font-black tracking-tight text-white sm:text-8xl">
-                            {currentToken.tokenNumber}
-                          </p>
-
-                          <div className="mt-4 flex items-center gap-2 text-sm text-emerald-200">
-                            <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                            {currentToken.status === "SERVING"
-                              ? "Service in progress"
-                              : "Citizen called"}
-                          </div>
-
-                        </div>
-
-                        {/* Token information */}
-                        <div className="grid grid-cols-2 gap-3">
-
-                          <div className="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur-sm">
-                            <p className="text-xs text-slate-300">
-                              Citizen
-                            </p>
-
-                            <p className="mt-1 truncate font-bold text-white">
-                              {currentToken.userId?.name || "—"}
-                            </p>
-                          </div>
-
-                          <div className="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur-sm">
-                            <p className="text-xs text-slate-300">
-                              Counter
-                            </p>
-
-                            <p className="mt-1 truncate font-bold text-white">
-                              {counterName}
-                            </p>
-                          </div>
-
-                          <div className="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur-sm">
-                            <p className="text-xs text-slate-300">
-                              Service
-                            </p>
-
-                            <p className="mt-1 truncate font-bold text-white">
-                              {currentToken.serviceId?.name || "—"}
-                            </p>
-                          </div>
-
-                          <div className="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur-sm">
-                            <p className="text-xs text-slate-300">
-                              {currentToken.status === "SERVING"
-                                ? "Started"
-                                : "Called"}
-                            </p>
-
-                            <p className="mt-1 font-bold text-white">
-                              {formatTime(
-                                currentToken.status === "SERVING"
-                                  ? currentToken.startedAt
-                                  : currentToken.calledAt
-                              )}
-                            </p>
-                          </div>
-
-                        </div>
-
-                      </div>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="mt-5 grid gap-3 sm:grid-cols-3">
-
-                      {!currentToken && (
-                        <ActionButton
-                          className={`${BTN.primary} rounded-xl`}
-                          busy={busy === "next"}
-                          disabled={
-                            !isAvailable ||
-                            waiting.length === 0 ||
-                            !!busy
-                          }
-                          busyLabel="Calling..."
-                          onClick={() =>
-                            runAction(
-                              "next",
-                              callNextToken,
-                              "Next token called."
-                            )
-                          }
-                        >
-                          Call Next
-                        </ActionButton>
-                      )}
-
-                      {currentToken?.status === "CALLED" && (
-                        <ActionButton
-                          className={`${BTN.primary} rounded-xl`}
-                          busy={busy === "start"}
-                          disabled={!!busy}
-                          busyLabel="Starting..."
-                          onClick={() =>
-                            runAction(
-                              "start",
-                              () => startToken(currentId),
-                              "Service started."
-                            )
-                          }
-                        >
-                          Start Serving
-                        </ActionButton>
-                      )}
-
-                      {currentToken?.status === "SERVING" && (
-                        <ActionButton
-                          className={`${BTN.success} rounded-xl`}
-                          busy={busy === "complete"}
-                          disabled={!!busy}
-                          busyLabel="Completing..."
-                          onClick={() =>
-                            runAction(
-                              "complete",
-                              () => completeToken(currentId),
-                              "Token completed."
-                            )
-                          }
-                        >
-                          Complete Token
-                        </ActionButton>
-                      )}
-
-                      <button
-                        type="button"
-                        onClick={() =>
-                          navigate("/operator/queue")
-                        }
-                        className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700 transition hover:border-teal-300 hover:bg-teal-50 hover:text-teal-700"
-                      >
-                        Manage Queue
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() =>
-                          navigate("/operator/counter")
-                        }
-                        className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
-                      >
-                        Counter Control
-                      </button>
-
-                    </div>
-
-                    {!currentToken && !isAvailable && (
-                      <div className="mt-4 rounded-xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm text-orange-700">
-                        Counter is{" "}
-                        {counterStyle(counterStatus)
-                          .label
-                          .toLowerCase()}
-                        . Set the counter to Available to
-                        call tokens.
-                      </div>
-                    )}
-
-                  </div>
-
-                ) : (
-
-                  /* Empty token */
-                  <div className="p-6 sm:p-7">
-
-                    <div className="rounded-3xl border border-dashed border-slate-300 bg-[#f7faf9] p-10 text-center">
-
-                      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-white text-teal-600 shadow-sm">
-                        <TicketIcon />
-                      </div>
-
-                      <h3 className="mt-5 text-xl font-black text-slate-900">
-                        No active token
-                      </h3>
-
-                      <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
-                        {waiting.length > 0
-                          ? `${waiting.length} citizen${
-                              waiting.length === 1 ? "" : "s"
-                            } waiting. Call the next citizen when ready.`
-                          : "There are currently no citizens waiting in your queue."}
-                      </p>
-
-                      <button
-                        type="button"
-                        disabled={
-                          !isAvailable ||
-                          waiting.length === 0 ||
-                          !!busy
-                        }
-                        onClick={() =>
-                          runAction(
-                            "next",
-                            callNextToken,
-                            "Next token called."
-                          )
-                        }
-                        className="mt-6 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-teal-600 to-blue-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-teal-600/20 transition hover:-translate-y-0.5 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        Call Next Citizen
-                        <ArrowRightIcon />
-                      </button>
-
-                    </div>
-
-                  </div>
-                )}
-
-              </div>
-
-              {/* QUICK ACTIONS */}
-              <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_10px_40px_rgba(15,23,42,0.06)]">
-
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.16em] text-teal-600">
-                    Workspace
-                  </p>
-
-                  <h2 className="mt-2 text-2xl font-black text-slate-900">
-                    Quick Actions
-                  </h2>
-
-                  <p className="mt-1 text-sm text-slate-500">
-                    Common controls for your counter.
-                  </p>
-                </div>
-
-                <div className="mt-6 space-y-3">
-
-                  {/* Queue */}
-                  <button
-                    type="button"
-                    onClick={() =>
-                      navigate("/operator/queue")
-                    }
-                    className="group flex w-full items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 text-left transition hover:-translate-y-0.5 hover:border-teal-200 hover:bg-teal-50"
-                  >
-                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-teal-50 text-teal-700 transition group-hover:bg-teal-100">
-                      <TicketIcon />
-                    </span>
-
-                    <span className="flex-1">
-                      <span className="block font-bold text-slate-900">
-                        View Queue
-                      </span>
-
-                      <span className="mt-0.5 block text-xs text-slate-500">
-                        Manage waiting citizens
-                      </span>
-                    </span>
-
-                    <ArrowRightIcon />
-                  </button>
-
-                  {/* Counter */}
-                  <button
-                    type="button"
-                    onClick={() =>
-                      navigate("/operator/counter")
-                    }
-                    className="group flex w-full items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 text-left transition hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-50"
-                  >
-                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-700">
-                      <MonitorIcon />
-                    </span>
-
-                    <span className="flex-1">
-                      <span className="block font-bold text-slate-900">
-                        Counter Control
-                      </span>
-
-                      <span className="mt-0.5 block text-xs text-slate-500">
-                        Manage counter availability
-                      </span>
-                    </span>
-
-                    <ArrowRightIcon />
-                  </button>
-
-                  {/* Pause / Resume */}
-                  <button
-                    type="button"
-                    disabled={!!busy}
-                    onClick={() =>
-                      runAction(
-                        "status",
-                        () =>
-                          updateCounterStatus(
-                            isAvailable
-                              ? "PAUSED"
-                              : "AVAILABLE"
-                          ),
-                        isAvailable
-                          ? "Counter paused."
-                          : "Counter is available."
-                      )
-                    }
-                    className="group flex w-full items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 text-left transition hover:-translate-y-0.5 hover:border-orange-200 hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-orange-50 text-orange-600">
-                      {isAvailable ? (
-                        <PauseIcon />
-                      ) : (
-                        <PlayIcon />
-                      )}
-                    </span>
-
-                    <span className="flex-1">
-                      <span className="block font-bold text-slate-900">
-                        {busy === "status"
-                          ? "Updating..."
-                          : isAvailable
-                          ? "Pause Counter"
-                          : "Set Available"}
-                      </span>
-
-                      <span className="mt-0.5 block text-xs text-slate-500">
-                        {isAvailable
-                          ? "Temporarily stop serving"
-                          : "Resume serving citizens"}
-                      </span>
-                    </span>
-
-                    <ArrowRightIcon />
-                  </button>
-
-                </div>
-
-                {/* Counter status */}
-                <div className="mt-6 rounded-2xl bg-[#f5f9f8] p-4">
-
-                  <div className="flex items-center gap-3">
-
-                    <span
-                      className={`h-3 w-3 rounded-full ${
-                        isAvailable
-                          ? "bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]"
-                          : "bg-orange-400"
-                      }`}
-                    />
-
-                    <div>
-                      <p className="text-sm font-bold text-slate-900">
-                        {statusStyle.label}
-                      </p>
-
-                      <p className="text-xs text-slate-500">
-                        {counterName}
-                      </p>
-                    </div>
-
-                  </div>
-
-                </div>
-
-              </div>
-
-            </section>
-
-            {/* =================================================
-                QUEUE OVERVIEW
-            ================================================= */}
-
-            <section className="mt-6 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_10px_40px_rgba(15,23,42,0.05)]">
-
-              <div className="flex flex-col gap-4 border-b border-slate-100 p-6 sm:flex-row sm:items-center sm:justify-between">
-
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-teal-500" />
-
-                    <p className="text-xs font-bold uppercase tracking-[0.15em] text-teal-600">
-                      Live Queue
-                    </p>
-                  </div>
-
-                  <h2 className="mt-2 text-2xl font-black text-slate-900">
-                    Queue Overview
-                  </h2>
-
-                  <p className="mt-1 text-sm text-slate-500">
-                    Next citizens waiting in your office.
-                  </p>
-                </div>
 
                 <button
                   type="button"
                   onClick={() =>
-                    navigate("/operator/queue")
+                    document
+                      .getElementById("counter-status")
+                      ?.scrollIntoView({ behavior: "smooth" })
                   }
-                  className="inline-flex items-center gap-2 self-start rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:border-teal-300 hover:bg-teal-50 hover:text-teal-700 sm:self-auto"
+                  className="transition hover:text-[#15396B]"
                 >
-                  View full queue
-                  <ArrowRightIcon />
+                  Counter control ↑
                 </button>
-
               </div>
+            </div>
 
-              {waiting.length === 0 ? (
+            {/* Service information */}
+            <div>
+              <h3 className="text-[10px] font-black uppercase tracking-[0.18em] text-[#15396B]">
+                Service commitment
+              </h3>
 
-                <div className="p-8">
+              <p className="mt-4 text-sm leading-6 text-slate-500">
+                Keep your availability accurate and follow your office
+                procedures while serving citizens.
+              </p>
 
-                  <div className="rounded-2xl border border-dashed border-slate-300 bg-[#f8faf9] p-10 text-center">
+              <p className="mt-3 text-xs font-semibold text-slate-400">
+                Secure operator access
+              </p>
+            </div>
+          </div>
 
-                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-teal-600 shadow-sm">
-                      <UsersIcon />
-                    </div>
+          <div className="mt-8 flex flex-col gap-3 border-t border-slate-100 pt-5 text-xs text-slate-400 sm:flex-row sm:items-center sm:justify-between">
+            <p>
+              © {new Date().getFullYear()} QueueLess. All rights reserved.
+            </p>
 
-                    <h3 className="mt-4 font-bold text-slate-900">
-                      Queue is clear
-                    </h3>
-
-                    <p className="mt-1 text-sm text-slate-500">
-                      No citizens are currently waiting.
-                    </p>
-
-                  </div>
-
-                </div>
-
-              ) : (
-
-                <div className="overflow-x-auto">
-
-                  <table className="w-full min-w-[700px]">
-
-                    <thead>
-                      <tr className="bg-[#f7faf9] text-left text-xs font-bold uppercase tracking-wider text-slate-500">
-
-                        <th className="px-6 py-4">
-                          Token
-                        </th>
-
-                        <th className="px-6 py-4">
-                          Service
-                        </th>
-
-                        <th className="px-6 py-4">
-                          Position
-                        </th>
-
-                        <th className="px-6 py-4">
-                          Joined
-                        </th>
-
-                        <th className="px-6 py-4">
-                          Status
-                        </th>
-
-                      </tr>
-                    </thead>
-
-                    <tbody>
-
-                      {waiting.slice(0, 5).map((t, i) => (
-
-                        <tr
-                          key={
-                            getId(t) ||
-                            t.tokenNumber
-                          }
-                          className="border-t border-slate-100 transition hover:bg-teal-50/40"
-                        >
-
-                          <td className="px-6 py-5">
-
-                            <div className="flex items-center gap-3">
-
-                              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-50 font-black text-teal-700">
-                                {i + 1}
-                              </span>
-
-                              <span className="font-black text-slate-900">
-                                {t.tokenNumber}
-                              </span>
-
-                            </div>
-
-                          </td>
-
-                          <td className="px-6 py-5 text-sm font-medium text-slate-600">
-                            {t.serviceId?.name || "—"}
-                          </td>
-
-                          <td className="px-6 py-5">
-
-                            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700">
-                              #{i + 1}
-                            </span>
-
-                          </td>
-
-                          <td className="px-6 py-5 text-sm text-slate-500">
-                            {formatTime(t.createdAt)}
-                          </td>
-
-                          <td className="px-6 py-5">
-                            <TokenStatusBadge
-                              status={t.status}
-                            />
-                          </td>
-
-                        </tr>
-
-                      ))}
-
-                    </tbody>
-
-                  </table>
-
-                </div>
-
-              )}
-
-            </section>
-
-            {/* =================================================
-                FOOTER STATUS
-            ================================================= */}
-
-            <section className="mt-6 flex flex-col gap-4 rounded-2xl border border-teal-100 bg-gradient-to-r from-teal-50 to-blue-50 p-5 sm:flex-row sm:items-center sm:justify-between">
-
-              <div className="flex items-center gap-3">
-
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-teal-600 shadow-sm">
-                  <CheckIcon />
-                </div>
-
-                <div>
-                  <p className="font-bold text-slate-900">
-                    QueueLess Operator System
-                  </p>
-
-                  <p className="text-xs text-slate-500">
-                    Real-time queue management is active.
-                  </p>
-                </div>
-
-              </div>
-
-              <div className="flex items-center gap-2 text-sm font-semibold text-emerald-700">
-                <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
-                System operational
-              </div>
-
-            </section>
-
-          </>
-
-        )}
-
-      </main>
+            <p className="flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-[#F0D96A]" />
+              Serving citizens, one token at a time.
+            </p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

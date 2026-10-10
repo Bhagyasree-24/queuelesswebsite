@@ -1,5 +1,25 @@
+
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import {
+  ArrowDownRight,
+  ArrowRight,
+  ArrowUpRight,
+  Building2,
+  ChartNoAxesCombined,
+  CheckCircle2,
+  Clock3,
+  FileText,
+  Monitor,
+  Users,
+  Ticket,
+  UserRoundCog,
+  Landmark,
+  RefreshCw,
+  CircleAlert,
+  CalendarDays,
+} from "lucide-react";
+
 import AdminLayout from "../../components/admin/AdminLayout";
 import {
   ErrorBlock,
@@ -15,33 +35,38 @@ import {
 const QUICK_LINKS = [
   {
     title: "Offices",
-    description: "View configured government offices",
-    icon: "🏛️",
+    description: "View and manage government office locations.",
+    icon: Building2,
     path: "/admin/offices",
+    number: "01",
   },
   {
     title: "Services",
-    description: "Create and manage services per office",
-    icon: "📋",
+    description: "Organize the services offered at each office.",
+    icon: FileText,
     path: "/admin/services",
+    number: "02",
   },
   {
     title: "Counters",
-    description: "Create and manage service counters",
-    icon: "🖥️",
+    description: "Configure counters for citizen assistance.",
+    icon: Monitor,
     path: "/admin/counters",
+    number: "03",
   },
   {
     title: "Staff",
-    description: "Manage operators and their assignments",
-    icon: "👥",
+    description: "Manage operators and their assignments.",
+    icon: UserRoundCog,
     path: "/admin/staff",
+    number: "04",
   },
   {
     title: "Analytics",
-    description: "Queue totals and peak hours",
-    icon: "📊",
+    description: "Review queue activity, totals and peak hours.",
+    icon: ChartNoAxesCombined,
     path: "/admin/analytics",
+    number: "05",
   },
 ];
 
@@ -49,40 +74,57 @@ const TOKEN_CARDS = [
   {
     key: "waitingTokens",
     label: "Waiting",
-    color: "text-emerald-400",
-    badgeBg: "bg-emerald-500/10 border-emerald-500/20",
+    description: "Awaiting assistance",
+    icon: Clock3,
+    color: "text-[#9A7220]",
+    background: "bg-[#FBF3DA]",
   },
   {
     key: "calledTokens",
     label: "Called",
-    color: "text-teal-300",
-    badgeBg: "bg-teal-500/10 border-teal-500/20",
+    description: "Ready at the counter",
+    icon: RadioIcon,
+    color: "text-[#81703F]",
+    background: "bg-[#F5F0DF]",
   },
   {
     key: "servingTokens",
     label: "Serving",
-    color: "text-emerald-300",
-    badgeBg: "bg-emerald-400/10 border-emerald-400/20",
+    description: "Currently in progress",
+    icon: Users,
+    color: "text-[#64764C]",
+    background: "bg-[#EEF1E5]",
   },
   {
     key: "completedTokens",
     label: "Completed",
-    color: "text-emerald-500",
-    badgeBg: "bg-emerald-600/10 border-emerald-600/20",
+    description: "Successfully served",
+    icon: CheckCircle2,
+    color: "text-[#65774D]",
+    background: "bg-[#F0F3E9]",
   },
   {
     key: "skippedTokens",
     label: "Skipped",
-    color: "text-amber-400",
-    badgeBg: "bg-amber-500/10 border-amber-500/20",
+    description: "Skipped in the queue",
+    icon: ArrowDownRight,
+    color: "text-[#A77A35]",
+    background: "bg-[#F9F0E1]",
   },
   {
     key: "cancelledTokens",
     label: "Cancelled",
-    color: "text-slate-400",
-    badgeBg: "bg-slate-700/30 border-slate-700",
+    description: "Cancelled tokens",
+    icon: CircleAlert,
+    color: "text-[#8C8980]",
+    background: "bg-[#F1F0EB]",
   },
 ];
+
+// A small icon component for the "Called" token card.
+function RadioIcon(props) {
+  return <Ticket {...props} />;
+}
 
 export default function AdminDashboard({ user }) {
   const [data, setData] = useState(null);
@@ -125,160 +167,275 @@ export default function AdminDashboard({ user }) {
 
   return (
     <AdminLayout user={user}>
-      <div className="min-h-screen bg-slate-950 text-slate-100 p-4 sm:p-6 lg:p-8 font-sans">
-        {/* Header Section */}
-        <div className="mb-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold uppercase tracking-widest mb-3">
-            <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            Official Digital Portal
+      <div className="min-h-screen bg-[#FAF9F5] px-4 py-6 font-sans text-[#292820] sm:px-6 sm:py-8 lg:px-10">
+
+        {/* PAGE INTRODUCTION */}
+        <section className="mx-auto max-w-[1500px]">
+          <div className="mb-8 flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
+            <div>
+              <div className="mb-4 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.24em] text-[#82754E]">
+                <Landmark size={14} strokeWidth={1.7} />
+                QueueLess Administration
+              </div>
+
+              <PageHeader
+                title="Administration Dashboard"
+                description="A clear overview of government offices, staff and citizen queue activity."
+              />
+
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-[#89867B]">
+                Manage public services with confidence. Monitor daily
+                activity and keep every service moving smoothly.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3 self-start rounded-full bg-[#F1EBD8] px-4 py-2.5 lg:self-auto">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#B6A05D] opacity-50" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-[#9A8345]" />
+              </span>
+              <span className="text-xs font-semibold text-[#76683E]">
+                Administration overview
+              </span>
+            </div>
           </div>
-          <PageHeader
-            title="Administration Dashboard"
-            description="Overview of offices, operators and queue activity across QueueLess."
-          />
-        </div>
 
-        <div className="mt-8 space-y-8">
-          {loading && <LoadingBlock label="Loading dashboard..." />}
-
-          {!loading && error && (
-            <ErrorBlock message={error} onRetry={load} />
-          )}
-
-          {!loading && !error && data && (
-            <>
-              {/* Stat Cards Overview */}
-              <section className="grid gap-5 sm:grid-cols-3">
-                <div className="group relative rounded-2xl border border-slate-800 bg-slate-900/60 p-6 backdrop-blur-md transition hover:border-emerald-500/40 hover:shadow-lg hover:shadow-emerald-500/5">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                    Government Offices
+          {/* TOP SUMMARY */}
+          <div className="mb-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="relative overflow-hidden rounded-[22px] bg-[#F0EAD6] p-6 sm:p-7">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#83754E]">
+                    Government offices
                   </p>
-                  <p className="mt-3 text-4xl font-extrabold text-white">
-                    {data.offices.length}
+                  <p className="mt-5 text-5xl font-semibold tracking-[-0.055em] text-[#332F23]">
+                    {data ? data.offices.length : "—"}
                   </p>
-                  <p className="mt-2 text-xs text-slate-400 flex items-center gap-1">
-                    <span className="text-emerald-400">✓</span> Active locations
-                  </p>
+                  <div className="mt-4 flex items-center gap-2 text-xs text-[#81775C]">
+                    <CheckCircle2 size={14} />
+                    Registered office locations
+                  </div>
                 </div>
 
-                <div className="group relative rounded-2xl border border-slate-800 bg-slate-900/60 p-6 backdrop-blur-md transition hover:border-emerald-500/40 hover:shadow-lg hover:shadow-emerald-500/5">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                    Operators
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/70 text-[#8A7743]">
+                  <Building2 size={23} strokeWidth={1.6} />
+                </div>
+              </div>
+
+              <div className="pointer-events-none absolute -bottom-12 -right-5 h-32 w-32 rounded-full bg-[#E3D8B4]/50" />
+            </div>
+
+            <div className="relative overflow-hidden rounded-[22px] bg-white p-6 sm:p-7">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#888477]">
+                    Staff and operators
                   </p>
-                  <p className="mt-3 text-4xl font-extrabold text-white">
-                    {data.staff.length}
+                  <p className="mt-5 text-5xl font-semibold tracking-[-0.055em] text-[#302F28]">
+                    {data ? data.staff.length : "—"}
                   </p>
-                  {unassigned > 0 ? (
-                    <p className="mt-2 text-xs font-medium text-amber-400/90 flex items-center gap-1">
-                      <span>⚠️</span> {unassigned} unassigned operator(s)
+
+                  {data && unassigned > 0 ? (
+                    <p className="mt-4 flex items-center gap-2 text-xs text-[#A2783B]">
+                      <CircleAlert size={14} />
+                      {unassigned} unassigned operator(s)
                     </p>
                   ) : (
-                    <p className="mt-2 text-xs text-slate-400 flex items-center gap-1">
-                      <span className="text-emerald-400">✓</span> All staff assigned
+                    <p className="mt-4 flex items-center gap-2 text-xs text-[#7A8466]">
+                      <CheckCircle2 size={14} />
+                      {data ? "All staff assigned" : "Staff overview"}
                     </p>
                   )}
                 </div>
 
-                <div className="group relative rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-slate-900/90 via-slate-900/60 to-emerald-950/30 p-6 backdrop-blur-md shadow-lg shadow-emerald-950/20">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                    Total Tokens
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#F4F0E3] text-[#8B7B4D]">
+                  <Users size={23} strokeWidth={1.6} />
+                </div>
+              </div>
+            </div>
+
+            <div className="relative overflow-hidden rounded-[22px] bg-[#28271F] p-6 text-white sm:p-7 sm:col-span-2 xl:col-span-1">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#D2C79E]">
+                    Total queue tokens
                   </p>
-                  <p className="mt-3 text-4xl font-extrabold text-emerald-400">
-                    {data.queue.totalTokens}
+                  <p className="mt-5 text-5xl font-semibold tracking-[-0.055em] text-[#F1DD79]">
+                    {data ? data.queue.totalTokens : "—"}
                   </p>
-                  <p className="mt-2 text-xs text-slate-400">
+                  <p className="mt-4 flex items-center gap-2 text-xs text-[#C7C3B4]">
+                    <Ticket size={14} />
                     All queue token records
                   </p>
                 </div>
-              </section>
 
-              {/* Live Queue Summary */}
-              <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 backdrop-blur-md shadow-sm">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div>
-                    <div className="flex items-center gap-3">
-                      <h2 className="text-2xl font-bold tracking-tight text-white">
-                        Queue Summary
-                      </h2>
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                        Live
-                      </span>
-                    </div>
-                    <p className="mt-1 text-sm text-slate-400">
-                      Tokens organized by current queue status
-                    </p>
-                  </div>
-
-                  <Link
-                    to="/admin/analytics"
-                    className="inline-flex items-center gap-2 rounded-xl bg-slate-800/80 px-4 py-2 text-sm font-semibold text-emerald-400 transition hover:bg-emerald-500/10 hover:text-emerald-300 border border-slate-700/50 hover:border-emerald-500/30"
-                  >
-                    View analytics
-                    <span>→</span>
-                  </Link>
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-[#F1DD79]">
+                  <Ticket size={23} strokeWidth={1.6} />
                 </div>
+              </div>
 
-                <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
-                  {TOKEN_CARDS.map((card) => (
-                    <div
-                      key={card.key}
-                      className={`rounded-xl border p-4 backdrop-blur-sm transition-all hover:-translate-y-0.5 ${card.badgeBg}`}
-                    >
-                      <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                        {card.label}
-                      </p>
-                      <p className={`mt-2 text-3xl font-extrabold ${card.color}`}>
-                        {data.queue[card.key] ?? 0}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </section>
+              <div className="pointer-events-none absolute -bottom-12 -right-4 h-32 w-32 rounded-full bg-[#F1DD79]/10" />
+            </div>
+          </div>
 
-              {/* Quick Navigation Cards */}
-              <section>
-                <h2 className="text-xl font-bold text-white mb-4">
-                  Management Overview
+          {/* QUEUE SUMMARY */}
+          <section className="mb-12">
+            <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+              <div>
+                <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-[#96865B]">
+                  Current activity
+                </p>
+
+                <h2 className="text-2xl font-semibold tracking-tight text-[#302F28] sm:text-3xl">
+                  Queue summary
                 </h2>
 
-                <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                  {QUICK_LINKS.map((link) => (
-                    <Link
-                      key={link.path}
-                      to={link.path}
-                      className="group relative flex flex-col justify-between rounded-2xl border border-slate-800 bg-slate-900/60 p-6 transition-all duration-200 hover:-translate-y-1 hover:border-emerald-500/40 hover:bg-slate-900/90 hover:shadow-xl hover:shadow-emerald-500/5"
-                    >
-                      <div>
-                        <div className="flex items-center justify-between">
-                          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-800 border border-slate-700/60 text-2xl group-hover:border-emerald-500/30 group-hover:bg-emerald-500/10 transition-colors">
-                            {link.icon}
-                          </div>
+                <p className="mt-2 text-sm text-[#89867B]">
+                  A real-time overview of tokens by their current status.
+                </p>
+              </div>
 
-                          <span className="text-xl text-slate-500 transition-transform duration-200 group-hover:translate-x-1 group-hover:text-emerald-400">
-                            →
-                          </span>
+              <Link
+                to="/admin/analytics"
+                className="inline-flex w-fit items-center gap-2 rounded-full bg-[#F0E7BD] px-5 py-3 text-xs font-semibold text-[#554A2C] transition-colors hover:bg-[#E8DCA2]"
+              >
+                View analytics
+                <ArrowUpRight size={15} />
+              </Link>
+            </div>
+
+            {loading && (
+              <div className="rounded-[22px] bg-white p-6">
+                <LoadingBlock label="Loading dashboard..." />
+              </div>
+            )}
+
+            {!loading && error && (
+              <div className="rounded-[22px] bg-white p-6">
+                <ErrorBlock message={error} onRetry={load} />
+              </div>
+            )}
+
+            {!loading && !error && data && (
+              <div className="grid grid-cols-1 gap-x-6 gap-y-7 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
+                {TOKEN_CARDS.map((card) => {
+                  const Icon = card.icon;
+
+                  return (
+                    <div
+                      key={card.key}
+                      className="group min-w-0 rounded-[20px] bg-white p-5 transition-colors hover:bg-[#FFFDF6]"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${card.background} ${card.color}`}>
+                          <Icon size={19} strokeWidth={1.7} />
                         </div>
 
-                        <h3 className="mt-5 text-lg font-bold text-white group-hover:text-emerald-400 transition-colors">
-                          {link.title}
+                        <span className="text-[10px] font-medium uppercase tracking-wider text-[#B0AA9B]">
+                          Tokens
+                        </span>
+                      </div>
+
+                      <p className={`mt-6 text-4xl font-semibold tracking-tight ${card.color}`}>
+                        {data.queue[card.key] ?? 0}
+                      </p>
+
+                      <h3 className="mt-2 text-sm font-semibold text-[#39382F]">
+                        {card.label}
+                      </h3>
+
+                      <p className="mt-1 text-xs leading-5 text-[#989487]">
+                        {card.description}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+
+          {/* MANAGEMENT OVERVIEW */}
+          <section className="pb-8">
+            <div className="mb-6 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+              <div>
+                <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-[#96865B]">
+                  Workspace
+                </p>
+                <h2 className="text-2xl font-semibold tracking-tight text-[#302F28] sm:text-3xl">
+                  Management overview
+                </h2>
+                <p className="mt-2 text-sm text-[#89867B]">
+                  Everything you need to run QueueLess from one place.
+                </p>
+              </div>
+
+              <span className="flex items-center gap-2 text-xs text-[#938D7D]">
+                <CalendarDays size={15} />
+                Administration workspace
+              </span>
+            </div>
+
+            <div className="grid gap-x-7 gap-y-3 sm:grid-cols-2 xl:grid-cols-3">
+              {QUICK_LINKS.map((item) => {
+                const Icon = item.icon;
+
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    className="group flex min-h-[150px] items-start gap-4 rounded-[20px] bg-white p-5 transition-colors hover:bg-[#FFFDF6] sm:p-6"
+                  >
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#F5F0DF] text-[#877444] transition-colors group-hover:bg-[#F0E5B7]">
+                      <Icon size={22} strokeWidth={1.6} />
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-3">
+                        <h3 className="text-base font-semibold text-[#302F28]">
+                          {item.title}
                         </h3>
 
-                        <p className="mt-2 text-sm leading-relaxed text-slate-400">
-                          {link.description}
-                        </p>
+                        <span className="text-xs font-medium text-[#B4A77C]">
+                          {item.number}
+                        </span>
                       </div>
 
-                      <div className="mt-4 pt-4 border-t border-slate-800/60 flex items-center text-xs font-medium text-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                        Manage section →
+                      <p className="mt-2 text-sm leading-6 text-[#89867B]">
+                        {item.description}
+                      </p>
+
+                      <div className="mt-4 inline-flex items-center gap-2 text-xs font-semibold text-[#82713E]">
+                        Open section
+                        <ArrowRight
+                          size={14}
+                          className="transition-transform group-hover:translate-x-1"
+                        />
                       </div>
-                    </Link>
-                  ))}
-                </div>
-              </section>
-            </>
-          )}
-        </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+
+          {/* FOOTER NOTE */}
+          <div className="flex flex-col gap-3 border-t border-[#EAE6DA] py-6 text-xs text-[#989285] sm:flex-row sm:items-center sm:justify-between">
+            <p>QueueLess · Digital queue management</p>
+
+            <button
+              type="button"
+              onClick={load}
+              disabled={loading}
+              className="inline-flex w-fit items-center gap-2 text-xs font-semibold text-[#817143] transition-colors hover:text-[#4F4529] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <RefreshCw
+                size={13}
+                className={loading ? "animate-spin" : ""}
+              />
+              Refresh dashboard
+            </button>
+          </div>
+        </section>
       </div>
     </AdminLayout>
   );

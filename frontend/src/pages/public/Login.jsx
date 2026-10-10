@@ -17,7 +17,7 @@ import {
   getCurrentUser,
 } from "../../services/authApi";
 
-export default function Login() {
+export default function Login({ onLogin }) {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -59,6 +59,8 @@ export default function Login() {
         );
         return;
       }
+
+      onLogin(currentUser.user);
 
       const role = currentUser.user.role;
 
