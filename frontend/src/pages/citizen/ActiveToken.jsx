@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import CitizenNavbar from "../../components/citizen/CitizenNavbar";
@@ -65,169 +66,279 @@ export default function ActiveToken({ user }) {
   const estimatedWaitTime = tokenData?.estimatedWaitTimeMinutes;
   const peopleAhead = Math.max(0, (queuePosition || 1) - 1);
 
+  const statusStyle =
+    token?.status === "WAITING"
+      ? "bg-amber-50 text-amber-800 border-amber-200"
+      : token?.status === "CALLED" || token?.status === "SERVING"
+      ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+      : "bg-slate-100 text-slate-700 border-slate-200";
+
   return (
-    <div 
-      className="min-h-screen bg-cover bg-center bg-fixed relative text-slate-100 flex flex-col justify-between selection:bg-emerald-500 selection:text-white"
-      style={{
-        backgroundImage: `linear-gradient(to bottom, rgba(5, 30, 25, 0.88), rgba(10, 45, 35, 0.95)), url('https://images.unsplash.com/photo-1542224566-6e85f2e6772f?q=80&w=2000&auto=format&fit=crop')`
-      }}
-    >
-      {/* Top Banner Context matching reference */}
-      <div className="w-full bg-slate-950/80 backdrop-blur-md text-emerald-400 px-6 py-2 text-xs font-medium flex justify-between items-center border-b border-emerald-500/20">
-        <div className="flex items-center gap-2">
-          <span className="bg-emerald-500 text-slate-950 font-bold px-2 py-0.5 rounded text-[10px] uppercase tracking-wider">
-            Live Portal
+    <div className="min-h-screen flex flex-col bg-[#F7F8FA] text-slate-900 selection:bg-amber-200 selection:text-slate-900">
+      {/* Top announcement banner */}
+      <div className="border-b border-white/10 bg-[#15396B] px-4 py-2.5 text-white">
+        <div className="mx-auto flex max-w-7xl items-center gap-3 text-xs sm:text-sm">
+          <span className="shrink-0 bg-[#F4B544] px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-[#15396B]">
+            QUEUELESS
           </span>
-          <span className="hidden sm:inline text-slate-300">Real-time queue tracking is currently active.</span>
+          <span className="text-blue-100">
+            Your queue, your time. Track your service token here.
+          </span>
         </div>
       </div>
 
-      {/* Citizen Navbar */}
+      {/* Existing citizen navbar */}
       <CitizenNavbar user={user} />
 
-      {/* Main Container */}
-      <main className="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8 w-full flex-1 relative z-10">
-        {/* Back */}
+      {/* Main page */}
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+        {/* Back navigation */}
         <button
           type="button"
           onClick={() => navigate("/citizen")}
-          className="mb-8 text-sm font-semibold text-emerald-300 transition hover:text-emerald-200 flex items-center gap-1.5"
+          className="mb-8 inline-flex items-center gap-2 text-sm font-bold text-[#15396B] transition hover:text-amber-700"
         >
-          ← Back to home
+          <span className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white transition hover:border-amber-400">
+            ←
+          </span>
+          Back to dashboard
         </button>
 
+        {/* Page heading */}
+        <div className="mb-8">
+          <p className="mb-2 text-xs font-extrabold uppercase tracking-[0.2em] text-amber-700">
+            CITIZEN SERVICES / TOKEN TRACKING
+          </p>
+          <h1 className="text-3xl font-black tracking-tight text-[#15396B] sm:text-4xl">
+            Your Active Token
+          </h1>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
+            Keep track of your queue position and estimated waiting time.
+            Please stay updated so you don't miss your turn.
+          </p>
+        </div>
+
+        {/* Loading state */}
         {loading ? (
-          <div className="mt-10 rounded-3xl border border-white/20 bg-slate-900/90 backdrop-blur-xl p-12 text-center shadow-2xl">
-            <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-emerald-500 border-t-transparent" />
-            <p className="mt-4 text-slate-300">Loading virtual token...</p>
+          <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center shadow-sm">
+            <div className="mx-auto h-11 w-11 animate-spin rounded-full border-4 border-[#15396B]/15 border-t-[#15396B]" />
+            <p className="mt-5 font-semibold text-slate-700">
+              Loading your token details...
+            </p>
+            <p className="mt-1 text-sm text-slate-500">
+              Please wait while we retrieve your queue information.
+            </p>
           </div>
         ) : error ? (
-          <div className="rounded-3xl border border-rose-500/30 bg-rose-950/80 backdrop-blur-xl p-8 text-center text-rose-200 shadow-2xl">
-            <h2 className="text-xl font-bold">Error</h2>
-            <p className="mt-2 text-sm text-rose-300">{error}</p>
+          /* Error state */
+          <div className="rounded-2xl border border-red-200 bg-white p-8 text-center shadow-sm sm:p-12">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-red-50 text-2xl text-red-600">
+              !
+            </div>
+            <h2 className="mt-4 text-xl font-extrabold text-slate-900">
+              Unable to load token
+            </h2>
+            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-red-600">
+              {error}
+            </p>
             <button
               type="button"
               onClick={() => navigate("/citizen")}
-              className="mt-6 rounded-xl bg-rose-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-rose-700 shadow-lg"
+              className="mt-6 rounded-lg bg-[#15396B] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#102D55] focus:outline-none focus:ring-2 focus:ring-[#15396B]/30"
             >
-              Return Home
+              Return to Dashboard
             </button>
           </div>
         ) : !token ? (
-          <div className="rounded-3xl border border-white/20 bg-slate-900/90 backdrop-blur-xl p-8 text-center text-slate-300 shadow-2xl">
-            Token not found.
+          /* Missing token state */
+          <div className="rounded-2xl border border-slate-200 bg-white px-6 py-14 text-center shadow-sm">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-amber-50 text-2xl text-amber-700">
+              !
+            </div>
+            <h2 className="mt-4 text-xl font-extrabold text-[#15396B]">
+              Token not found
+            </h2>
+            <p className="mt-2 text-sm text-slate-500">
+              We couldn't find the token details for this request.
+            </p>
+            <button
+              type="button"
+              onClick={() => navigate("/citizen")}
+              className="mt-6 rounded-lg bg-[#15396B] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#102D55]"
+            >
+              Back to Dashboard
+            </button>
           </div>
         ) : (
           <>
-            {/* Heading */}
-            <div className="text-center">
-              <span
-                className={`inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-wider backdrop-blur-md border ${
-                  token.status === "WAITING"
-                    ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-300"
-                    : token.status === "CALLED" || token.status === "SERVING"
-                    ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-300"
-                    : "bg-slate-800/80 border-slate-700 text-slate-300"
-                }`}
+            {/* Office and service information */}
+            <div className="mb-6 flex flex-col justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:p-6">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                  SERVICE DETAILS
+                </p>
+                <h2 className="mt-2 text-xl font-extrabold text-[#15396B] sm:text-2xl">
+                  {token.officeId?.name}
+                </h2>
+                <p className="mt-1 text-sm text-slate-600">
+                  {token.serviceId?.name}
+                </p>
+              </div>
+
+              <div
+                className={`inline-flex w-fit items-center gap-2 rounded-full border px-4 py-2 text-xs font-extrabold tracking-wide ${statusStyle}`}
               >
                 <span
-                  className={`h-2 w-2 rounded-full ${
+                  className={`h-2.5 w-2.5 rounded-full ${
                     token.status === "WAITING"
-                      ? "bg-emerald-400 animate-pulse"
-                      : token.status === "CALLED" || token.status === "SERVING"
-                      ? "bg-emerald-400 animate-ping"
+                      ? "animate-pulse bg-amber-500"
+                      : token.status === "CALLED" ||
+                        token.status === "SERVING"
+                      ? "bg-emerald-500"
                       : "bg-slate-400"
                   }`}
                 />
-                Status: {token.status}
+                {token.status}
+              </div>
+            </div>
+
+            {/* Main token card */}
+            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+              {/* Saffron accent */}
+              <div className="h-1.5 bg-[#F4B544]" />
+
+              <div className="p-5 sm:p-8 lg:p-10">
+                {/* Token number */}
+                <div className="rounded-xl border border-slate-200 bg-[#F7F8FA] px-4 py-8 text-center sm:py-10">
+                  <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-slate-500">
+                    YOUR TOKEN NUMBER
+                  </p>
+
+                  <p className="mt-3 break-words text-6xl font-black tracking-tight text-[#15396B] sm:text-8xl">
+                    {token.tokenNumber}
+                  </p>
+
+                  <div className="mt-5 flex justify-center">
+                    <span
+                      className={`inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-xs font-extrabold uppercase tracking-wider ${statusStyle}`}
+                    >
+                      <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                      {token.status}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Queue statistics */}
+                <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                  <div className="rounded-xl border border-slate-200 p-5 sm:p-6">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-sm font-semibold text-slate-600">
+                        People ahead
+                      </p>
+                      <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-lg font-black text-[#15396B]">
+                        #
+                      </span>
+                    </div>
+
+                    <p className="mt-4 text-4xl font-black tabular-nums text-[#15396B]">
+                      {token.status === "WAITING" ? peopleAhead : 0}
+                    </p>
+                    <p className="mt-2 text-xs leading-5 text-slate-500">
+                      People waiting before your turn
+                    </p>
+                  </div>
+
+                  <div className="rounded-xl border border-slate-200 p-5 sm:p-6">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-sm font-semibold text-slate-600">
+                        Estimated wait
+                      </p>
+                      <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-50 text-lg font-black text-amber-700">
+                        ↗
+                      </span>
+                    </div>
+
+                    <p className="mt-4 text-4xl font-black tabular-nums text-[#15396B]">
+                      {estimatedWaitTime !== null &&
+                      estimatedWaitTime !== undefined
+                        ? estimatedWaitTime
+                        : 0}
+                      <span className="ml-2 text-base font-bold text-slate-500">
+                        min
+                      </span>
+                    </p>
+                    <p className="mt-2 text-xs leading-5 text-slate-500">
+                      Approximate waiting time
+                    </p>
+                  </div>
+                </div>
+
+                {/* Assigned counter */}
+                <div className="mt-5 flex flex-col gap-3 rounded-xl border border-blue-100 bg-blue-50/60 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+                  <div>
+                    <p className="text-xs font-extrabold uppercase tracking-wider text-slate-500">
+                      ASSIGNED COUNTER
+                    </p>
+                    <p className="mt-2 text-lg font-extrabold text-[#15396B]">
+                      {token.counterId?.number
+                        ? `Counter #${token.counterId.number}`
+                        : "Will be assigned when called"}
+                    </p>
+                  </div>
+                  <span className="w-fit rounded-md border border-blue-100 bg-white px-3 py-2 text-xs font-bold text-[#15396B]">
+                    SERVICE INFORMATION
+                  </span>
+                </div>
+
+                {/* Cancel token */}
+                {["WAITING", "CALLED"].includes(token.status) && (
+                  <div className="mt-6 border-t border-slate-100 pt-6">
+                    <p className="mb-3 text-sm leading-6 text-slate-500">
+                      No longer need this appointment? You can cancel your
+                      token below.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleCancel}
+                      disabled={cancelling}
+                      className="w-full rounded-lg border border-red-200 bg-white px-6 py-3.5 text-sm font-bold text-red-600 transition hover:border-red-300 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-200 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+                    >
+                      {cancelling ? "Cancelling..." : "Cancel Token"}
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Citizen notice */}
+            <div className="mt-6 flex gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 sm:p-5">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#F4B544] font-black text-[#15396B]">
+                i
               </span>
-
-              <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
-                Your Virtual Token
-              </h1>
-
-              <p className="mt-2 text-sm text-slate-300 font-medium">
-                {token.officeId?.name} · {token.serviceId?.name}
-              </p>
-            </div>
-
-            {/* Token Card */}
-            <div className="mx-auto mt-8 max-w-2xl rounded-3xl border border-white/20 bg-slate-900/90 backdrop-blur-xl p-6 shadow-2xl sm:p-8 text-slate-100 flex flex-col gap-6">
-              {/* Token number */}
-              <div className="rounded-2xl bg-slate-950/60 border border-white/10 py-8 text-center flex flex-col items-center justify-center gap-2">
-                <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest">
-                  Token Number
+              <div>
+                <p className="text-sm font-extrabold text-[#15396B]">
+                  Please be ready for your turn
                 </p>
-
-                <p className="text-6xl sm:text-7xl font-black tracking-tight text-emerald-400">
-                  {token.tokenNumber}
-                </p>
-
-                <span className="mt-2 inline-block rounded-full bg-emerald-500/20 border border-emerald-500/30 px-4 py-1 text-xs font-semibold text-emerald-300 uppercase">
-                  {token.status}
-                </span>
-              </div>
-
-              {/* Main stats */}
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="rounded-2xl bg-slate-950/40 border border-white/10 p-5 text-center flex flex-col justify-center">
-                  <p className="text-xs text-slate-400 font-medium uppercase tracking-wider">People ahead</p>
-
-                  <p className="mt-1 text-3xl sm:text-4xl font-extrabold text-white">
-                    {token.status === "WAITING" ? peopleAhead : 0}
-                  </p>
-
-                  <p className="mt-1 text-xs text-slate-400">
-                    people waiting before you
-                  </p>
-                </div>
-
-                <div className="rounded-2xl bg-slate-950/40 border border-white/10 p-5 text-center flex flex-col justify-center">
-                  <p className="text-xs text-slate-400 font-medium uppercase tracking-wider">Estimated wait</p>
-
-                  <p className="mt-1 text-3xl sm:text-4xl font-extrabold text-emerald-400">
-                    {estimatedWaitTime !== null && estimatedWaitTime !== undefined
-                      ? estimatedWaitTime
-                      : 0}
-                    <span className="ml-1 text-base font-normal text-slate-400">min</span>
-                  </p>
-
-                  <p className="mt-1 text-xs text-slate-400">
-                    approximate waiting time
-                  </p>
-                </div>
-              </div>
-
-              {/* Counter info */}
-              <div className="rounded-2xl border border-white/10 bg-slate-950/40 p-5 text-center">
-                <p className="text-xs text-slate-400 font-medium uppercase tracking-wider">Assigned Counter</p>
-                <p className="mt-1 text-lg font-bold text-white">
-                  {token.counterId?.number
-                    ? `Counter #${token.counterId.number}`
-                    : "Will be assigned when called"}
+                <p className="mt-1 text-sm leading-6 text-slate-600">
+                  Please arrive at the office before your turn is called.
+                  Keep checking your token status and estimated waiting time.
                 </p>
               </div>
-
-              {/* Cancel Button */}
-              {["WAITING", "CALLED"].includes(token.status) && (
-                <button
-                  type="button"
-                  onClick={handleCancel}
-                  disabled={cancelling}
-                  className="w-full rounded-xl border border-rose-500/30 bg-rose-600/10 px-6 py-3.5 font-semibold text-rose-300 transition hover:bg-rose-600/20 hover:border-rose-500/50 disabled:cursor-not-allowed disabled:opacity-60 shadow-lg"
-                >
-                  {cancelling ? "Cancelling..." : "Cancel Token"}
-                </button>
-              )}
-            </div>
-
-            {/* Notice */}
-            <div className="mx-auto mt-6 max-w-2xl rounded-2xl border border-emerald-500/30 bg-emerald-950/40 backdrop-blur-md p-4 text-center text-sm text-emerald-300 font-medium shadow-lg">
-              Please arrive at the office before your turn is called.
             </div>
           </>
         )}
       </main>
+
+      {/* Footer */}
+      <footer className="mt-8 border-t border-slate-200 bg-white">
+        <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-5 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
+          <p>
+            <span className="font-extrabold text-[#15396B]">QUEUELESS</span>
+            {" "}· Simplifying public service queues
+          </p>
+          <p>Track your token. Save your time.</p>
+        </div>
+      </footer>
     </div>
   );
 }

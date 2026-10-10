@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -9,6 +10,8 @@ import {
   EyeOff,
   ArrowRight,
   ShieldCheck,
+  CheckCircle2,
+  UserPlus,
 } from "lucide-react";
 
 import { registerUser } from "../../services/authApi";
@@ -26,7 +29,6 @@ export default function Register() {
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -41,11 +43,10 @@ export default function Register() {
 
   async function handleSubmit(event) {
     event.preventDefault();
-
     setError("");
 
     if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match");
+      setError("Passwords do not match. Please try again.");
       return;
     }
 
@@ -60,148 +61,186 @@ export default function Register() {
       });
 
       if (!data.user) {
-        setError(data.message || "Registration failed");
+        setError(data.message || "Registration failed. Please try again.");
         return;
       }
 
       navigate("/login");
     } catch (error) {
       console.error("Registration error:", error);
-      setError("Unable to connect to the server");
+      setError("Unable to connect to the server. Please try again.");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#061b3a]">
-
-      {/* ===================================================== */}
-      {/* BACKGROUND IMAGE */}
-      {/* ===================================================== */}
-
-      <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{
-          backgroundImage: "url('/registration.png')",
-        }}
-      />
-
-      {/* Dark blue overlay */}
-      <div className="absolute inset-0 bg-[#031b3d]/35" />
-
-      {/* Gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-r from-[#031b3d]/70 via-[#031b3d]/20 to-transparent" />
-
-      {/* ===================================================== */}
-      {/* HEADER */}
-      {/* ===================================================== */}
-
-      <header className="relative z-30 border-b border-white/20 bg-white/95 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-
-          {/* QueueLess Logo */}
+    <div
+      id="top"
+      className="min-h-screen bg-[#F7F8FA] text-slate-900"
+    >
+      {/* Header */}
+      <header className="relative z-10 border-b border-slate-200 bg-white">
+        <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-5 sm:px-8">
           <Link
             to="/"
             aria-label="QueueLess home"
-            className="text-2xl font-extrabold tracking-tight"
+            className="flex items-center gap-3"
           >
-            <span className="text-slate-900">
-              Queue
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#15396B] text-xl font-black text-white">
+              Q
             </span>
 
-            <span className="text-blue-600">
-              Less
+            <span className="text-xl font-extrabold tracking-tight">
+              Queue<span className="text-[#D97706]">Less</span>
             </span>
           </Link>
 
-          {/* Back to Home */}
           <Link
             to="/"
-            className="flex items-center gap-1.5 text-sm font-semibold text-slate-700 transition hover:text-blue-600"
+            className="text-sm font-semibold text-slate-600 transition hover:text-[#15396B]"
           >
-            <span>←</span>
+            <span aria-hidden="true">← </span>
             Back to home
           </Link>
-
         </div>
       </header>
 
-      {/* ===================================================== */}
-      {/* REGISTRATION SECTION */}
-      {/* ===================================================== */}
+      <main className="mx-auto grid min-h-[calc(100vh-72px)] max-w-7xl grid-cols-1 lg:grid-cols-2">
+        {/* Left visual panel */}
+        <section className="relative hidden min-h-[720px] overflow-hidden bg-[#102D54] lg:flex lg:flex-col lg:justify-between lg:p-12 xl:p-16">
+          <div
+            className="absolute inset-0 bg-cover bg-center"
+            style={{
+              backgroundImage: "url('/registration.png')",
+            }}
+          />
 
-      <main className="relative z-10 flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-8 sm:px-6 lg:justify-start lg:px-16 xl:px-24">
+          <div className="absolute inset-0 bg-[#0A2345]/80" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#07172E] via-transparent to-[#102D54]/30" />
 
-        <div className="w-full max-w-md">
+          <div className="relative z-10">
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white backdrop-blur">
+              <span className="h-2 w-2 rounded-full bg-[#F4B544]" />
+              Start your QueueLess journey
+            </span>
 
-          {/* ================================================= */}
-          {/* REGISTRATION CARD */}
-          {/* ================================================= */}
+            <h1 className="mt-8 max-w-lg text-4xl font-black leading-tight text-white xl:text-5xl">
+              Your time.
+              <br />
+              Your services.
+              <br />
+              <span className="text-[#F4B544]">Your convenience.</span>
+            </h1>
 
-          <div className="rounded-[28px] border border-white/50 bg-white/90 p-6 shadow-[0_25px_80px_rgba(0,0,0,0.30)] backdrop-blur-xl sm:p-8">
+            <p className="mt-5 max-w-md text-base leading-7 text-slate-200">
+              Create your account to make managing public-service
+              visits simpler and more convenient.
+            </p>
+          </div>
 
-            {/* ================================================= */}
-            {/* HEADER / LOGO */}
-            {/* ================================================= */}
+          <div className="relative z-10 space-y-4 rounded-2xl border border-white/20 bg-white/10 p-5 backdrop-blur-md">
+            <h2 className="font-bold text-white">
+              Designed around your needs
+            </h2>
 
-            <div className="mb-6 text-center">
-
-              {/* Q Logo */}
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-purple-600 text-2xl font-bold text-white shadow-lg shadow-blue-500/30">
-                Q
+            <div className="flex items-start gap-3">
+              <CheckCircle2
+                size={19}
+                className="mt-0.5 shrink-0 text-[#F4B544]"
+              />
+              <div>
+                <p className="text-sm font-semibold text-white">
+                  Convenient access
+                </p>
+                <p className="mt-1 text-sm leading-5 text-slate-200">
+                  Access your account when you need it.
+                </p>
               </div>
-
-              <h1 className="mt-5 text-3xl font-bold tracking-tight text-slate-900">
-                Create your account
-              </h1>
-
-              <p className="mt-2 text-sm text-slate-600">
-                Join QueueLess and skip the waiting line
-              </p>
-
             </div>
 
-            {/* ================================================= */}
-            {/* FORM */}
-            {/* ================================================= */}
+            <div className="flex items-start gap-3">
+              <CheckCircle2
+                size={19}
+                className="mt-0.5 shrink-0 text-[#F4B544]"
+              />
+              <div>
+                <p className="text-sm font-semibold text-white">
+                  A simple experience
+                </p>
+                <p className="mt-1 text-sm leading-5 text-slate-200">
+                  Manage your QueueLess experience in one place.
+                </p>
+              </div>
+            </div>
 
-            <form
-              className="space-y-4"
-              onSubmit={handleSubmit}
-              noValidate
-            >
+            <div className="flex items-start gap-3">
+              <CheckCircle2
+                size={19}
+                className="mt-0.5 shrink-0 text-[#F4B544]"
+              />
+              <div>
+                <p className="text-sm font-semibold text-white">
+                  Security-conscious design
+                </p>
+                <p className="mt-1 text-sm leading-5 text-slate-200">
+                  Keep your account details private and secure.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
 
-              {/* ================================================= */}
-              {/* ERROR */}
-              {/* ================================================= */}
+        {/* Registration form */}
+        <section className="flex items-center justify-center px-5 py-10 sm:px-10 lg:px-12 xl:px-20">
+          <div className="w-full max-w-md">
+            <div className="mb-6 lg:hidden">
+              <span className="inline-flex rounded-full bg-[#E9EFF8] px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-[#15396B]">
+                Join QueueLess
+              </span>
+            </div>
 
+            <div className="mb-7">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#E9EFF8] text-[#15396B]">
+                <UserPlus size={23} />
+              </div>
+
+              <p className="text-sm font-bold uppercase tracking-[0.16em] text-[#B66A09]">
+                Create an account
+              </p>
+
+              <h2 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">
+                Get started
+              </h2>
+
+              <p className="mt-3 text-sm leading-6 text-slate-500">
+                Enter your details to create your QueueLess account.
+              </p>
+            </div>
+
+            <form onSubmit={handleSubmit} noValidate className="space-y-4">
               {error && (
                 <div
                   role="alert"
-                  className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600"
+                  className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700"
                 >
                   {error}
                 </div>
               )}
 
-              {/* ================================================= */}
-              {/* FULL NAME */}
-              {/* ================================================= */}
-
+              {/* Full name */}
               <div>
-
                 <label
                   htmlFor="name"
-                  className="mb-2 block text-sm font-semibold text-slate-700"
+                  className="mb-2 block text-sm font-bold text-slate-700"
                 >
                   Full name
                 </label>
 
                 <div className="relative">
-
                   <User
                     size={18}
+                    aria-hidden="true"
                     className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
                   />
 
@@ -213,30 +252,24 @@ export default function Register() {
                     value={formData.name}
                     onChange={handleChange}
                     required
-                    className="h-11 w-full rounded-xl border border-slate-300 bg-white/90 pl-11 pr-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"
+                    className="h-12 w-full rounded-xl border border-slate-300 bg-white px-4 pl-11 text-sm outline-none transition placeholder:text-slate-400 hover:border-slate-400 focus:border-[#15396B] focus:ring-4 focus:ring-blue-100"
                   />
-
                 </div>
-
               </div>
 
-              {/* ================================================= */}
-              {/* EMAIL */}
-              {/* ================================================= */}
-
+              {/* Email */}
               <div>
-
                 <label
                   htmlFor="email"
-                  className="mb-2 block text-sm font-semibold text-slate-700"
+                  className="mb-2 block text-sm font-bold text-slate-700"
                 >
-                  Email
+                  Email address
                 </label>
 
                 <div className="relative">
-
                   <Mail
                     size={18}
+                    aria-hidden="true"
                     className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
                   />
 
@@ -248,30 +281,24 @@ export default function Register() {
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    className="h-11 w-full rounded-xl border border-slate-300 bg-white/90 pl-11 pr-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"
+                    className="h-12 w-full rounded-xl border border-slate-300 bg-white px-4 pl-11 text-sm outline-none transition placeholder:text-slate-400 hover:border-slate-400 focus:border-[#15396B] focus:ring-4 focus:ring-blue-100"
                   />
-
                 </div>
-
               </div>
 
-              {/* ================================================= */}
-              {/* PHONE */}
-              {/* ================================================= */}
-
+              {/* Phone */}
               <div>
-
                 <label
                   htmlFor="phone"
-                  className="mb-2 block text-sm font-semibold text-slate-700"
+                  className="mb-2 block text-sm font-bold text-slate-700"
                 >
-                  Phone
+                  Phone number
                 </label>
 
                 <div className="relative">
-
                   <Phone
                     size={18}
+                    aria-hidden="true"
                     className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
                   />
 
@@ -283,30 +310,24 @@ export default function Register() {
                     value={formData.phone}
                     onChange={handleChange}
                     required
-                    className="h-11 w-full rounded-xl border border-slate-300 bg-white/90 pl-11 pr-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"
+                    className="h-12 w-full rounded-xl border border-slate-300 bg-white px-4 pl-11 text-sm outline-none transition placeholder:text-slate-400 hover:border-slate-400 focus:border-[#15396B] focus:ring-4 focus:ring-blue-100"
                   />
-
                 </div>
-
               </div>
 
-              {/* ================================================= */}
-              {/* PASSWORD */}
-              {/* ================================================= */}
-
+              {/* Password */}
               <div>
-
                 <label
                   htmlFor="password"
-                  className="mb-2 block text-sm font-semibold text-slate-700"
+                  className="mb-2 block text-sm font-bold text-slate-700"
                 >
-                  Password
+                  Create password
                 </label>
 
                 <div className="relative">
-
                   <Lock
                     size={18}
+                    aria-hidden="true"
                     className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
                   />
 
@@ -318,65 +339,45 @@ export default function Register() {
                     value={formData.password}
                     onChange={handleChange}
                     required
-                    className="h-11 w-full rounded-xl border border-slate-300 bg-white/90 pl-11 pr-12 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"
+                    className="h-12 w-full rounded-xl border border-slate-300 bg-white px-4 pl-11 pr-12 text-sm outline-none transition placeholder:text-slate-400 hover:border-slate-400 focus:border-[#15396B] focus:ring-4 focus:ring-blue-100"
                   />
 
                   <button
                     type="button"
-                    onClick={() =>
-                      setShowPassword((prev) => !prev)
-                    }
-                    aria-label={
-                      showPassword
-                        ? "Hide password"
-                        : "Show password"
-                    }
-                    className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center justify-center rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-[#15396B] focus:outline-none focus:ring-2 focus:ring-blue-300"
                   >
-                    {showPassword ? (
-                      <EyeOff size={18} />
-                    ) : (
-                      <Eye size={18} />
-                    )}
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
-
                 </div>
-
               </div>
 
-              {/* ================================================= */}
-              {/* CONFIRM PASSWORD */}
-              {/* ================================================= */}
-
+              {/* Confirm password */}
               <div>
-
                 <label
                   htmlFor="confirmPassword"
-                  className="mb-2 block text-sm font-semibold text-slate-700"
+                  className="mb-2 block text-sm font-bold text-slate-700"
                 >
                   Confirm password
                 </label>
 
                 <div className="relative">
-
                   <Lock
                     size={18}
+                    aria-hidden="true"
                     className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
                   />
 
                   <input
                     id="confirmPassword"
-                    type={
-                      showConfirmPassword
-                        ? "text"
-                        : "password"
-                    }
+                    type={showConfirmPassword ? "text" : "password"}
                     autoComplete="new-password"
-                    placeholder="Confirm your password"
+                    placeholder="Re-enter your password"
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     required
-                    className="h-11 w-full rounded-xl border border-slate-300 bg-white/90 pl-11 pr-12 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"
+                    className="h-12 w-full rounded-xl border border-slate-300 bg-white px-4 pl-11 pr-12 text-sm outline-none transition placeholder:text-slate-400 hover:border-slate-400 focus:border-[#15396B] focus:ring-4 focus:ring-blue-100"
                   />
 
                   <button
@@ -389,7 +390,7 @@ export default function Register() {
                         ? "Hide confirm password"
                         : "Show confirm password"
                     }
-                    className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center justify-center rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-[#15396B] focus:outline-none focus:ring-2 focus:ring-blue-300"
                   >
                     {showConfirmPassword ? (
                       <EyeOff size={18} />
@@ -397,77 +398,54 @@ export default function Register() {
                       <Eye size={18} />
                     )}
                   </button>
-
                 </div>
-
               </div>
-
-              {/* ================================================= */}
-              {/* CREATE ACCOUNT BUTTON */}
-              {/* ================================================= */}
 
               <button
                 type="submit"
                 disabled={loading}
-                className="group mt-2 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-4 font-semibold text-white shadow-lg shadow-blue-500/30 transition duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-blue-500/40 focus:outline-none focus:ring-4 focus:ring-blue-200 disabled:cursor-not-allowed disabled:opacity-60"
+                className="group mt-2 flex min-h-[52px] w-full items-center justify-center gap-2 rounded-xl bg-[#15396B] px-5 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-950/10 transition hover:-translate-y-0.5 hover:bg-[#0D294F] focus:outline-none focus:ring-4 focus:ring-blue-200 disabled:cursor-not-allowed disabled:opacity-60"
               >
-
-                {loading ? (
-                  <>
-                    <span className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-
-                    Creating Account...
-                  </>
-                ) : (
-                  <>
-                    Create Account
-
-                    <ArrowRight
-                      size={17}
-                      className="transition-transform group-hover:translate-x-1"
-                    />
-                  </>
+                {loading ? "Creating account..." : "Create my account"}
+                {!loading && (
+                  <ArrowRight
+                    size={18}
+                    className="transition-transform group-hover:translate-x-1"
+                  />
                 )}
-
               </button>
-
             </form>
 
-            {/* ================================================= */}
-            {/* LOGIN LINK */}
-            {/* ================================================= */}
-
-            <p className="mt-5 text-center text-sm text-slate-600">
-
+            <div className="mt-6 text-center text-sm text-slate-600">
               Already have an account?{" "}
-
               <Link
                 to="/login"
-                className="font-semibold text-blue-600 transition hover:text-purple-600"
+                className="font-bold text-[#15396B] underline decoration-[#E5A33D] decoration-2 underline-offset-4 hover:text-[#B66A09]"
               >
-                Login
+                Sign in
               </Link>
-
-            </p>
-
-            {/* ================================================= */}
-            {/* SECURITY MESSAGE */}
-            {/* ================================================= */}
-
-            <div className="mt-5 flex items-center justify-center gap-2 text-xs text-slate-400">
-
-              <ShieldCheck size={14} />
-
-              <span>
-                Secure QueueLess account creation
-              </span>
-
             </div>
 
+            <div className="mt-6 flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-4">
+              <ShieldCheck
+                size={20}
+                className="mt-0.5 shrink-0 text-[#236544]"
+              />
+              <p className="text-xs leading-5 text-slate-500">
+                <span className="font-bold text-slate-700">
+                  Protect your account
+                </span>
+                <br />
+                Use a strong password and never share it with anyone.
+              </p>
+            </div>
+
+            <p className="mt-6 text-center text-xs leading-5 text-slate-400">
+              QueueLess is an independent queue-management project and
+              is not an official Government of India website.
+            </p>
           </div>
-
-        </div>
-
+        </section>
       </main>
     </div>
   );

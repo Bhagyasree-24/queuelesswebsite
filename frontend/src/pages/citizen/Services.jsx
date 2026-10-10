@@ -1,7 +1,11 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import CitizenNavbar from "../../components/citizen/CitizenNavbar";
-import { getOfficeServices, getOfficeById } from "../../services/citizenApi";
+import {
+  getOfficeServices,
+  getOfficeById,
+} from "../../services/citizenApi";
 
 export default function Services({ user }) {
   const navigate = useNavigate();
@@ -46,97 +50,95 @@ export default function Services({ user }) {
   }, [officeId]);
 
   return (
-    <div className="min-h-screen bg-[#f4f7f6] text-slate-900">
-      {/* Existing Citizen Navbar */}
+    <div className="min-h-screen bg-[#F7F8FA] text-slate-900">
       <CitizenNavbar user={user} />
 
-      {/* =========================================================
-          HERO / OFFICE HEADER
-      ========================================================= */}
-      <section className="relative overflow-hidden bg-[#073b3a]">
+      {/* OFFICIAL OFFICE HEADER */}
+      <section className="relative overflow-hidden bg-[#15396B]">
         {/* Decorative background */}
         <div className="absolute inset-0">
-          <div className="absolute -left-32 -top-32 h-96 w-96 rounded-full bg-teal-400/10 blur-3xl" />
-          <div className="absolute right-0 top-0 h-[500px] w-[500px] rounded-full bg-blue-500/10 blur-3xl" />
-          <div className="absolute bottom-0 left-1/3 h-64 w-64 rounded-full bg-emerald-400/10 blur-3xl" />
+          <div className="absolute -left-32 -top-32 h-96 w-96 rounded-full bg-white/5 blur-3xl" />
+          <div className="absolute right-0 top-0 h-[500px] w-[500px] rounded-full bg-[#F4B544]/10 blur-3xl" />
+          <div className="absolute bottom-0 left-1/3 h-64 w-64 rounded-full bg-blue-300/10 blur-3xl" />
         </div>
 
-        {/* Subtle grid */}
+        {/* Subtle official grid */}
         <div
-          className="absolute inset-0 opacity-[0.06]"
+          className="absolute inset-0 opacity-[0.05]"
           style={{
             backgroundImage:
-              "linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.5) 1px, transparent 1px)",
+              "linear-gradient(rgba(255,255,255,.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.6) 1px, transparent 1px)",
             backgroundSize: "42px 42px",
           }}
         />
 
         <div className="relative mx-auto max-w-7xl px-4 pb-14 pt-8 sm:px-6 lg:px-8">
-          {/* Back */}
+          {/* Back navigation */}
           <button
             type="button"
             onClick={() => navigate("/citizen")}
-            className="mb-10 flex items-center gap-2 text-sm font-medium text-teal-100 transition hover:text-white"
+            className="mb-10 flex items-center gap-2 text-sm font-semibold text-blue-100 transition hover:text-white"
           >
-            <span className="flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-white/5 transition group-hover:bg-white/10">
+            <span className="flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-white/5 transition hover:bg-white/10">
               ←
             </span>
             Back to offices
           </button>
 
           <div className="grid items-end gap-10 lg:grid-cols-[1fr_auto]">
-            {/* Left */}
+            {/* Office information */}
             <div className="max-w-3xl">
-              {/* Official badge */}
-              <div className="inline-flex items-center gap-2 rounded-full border border-teal-300/30 bg-teal-400/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-teal-200">
-                <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,.8)]" />
-                Official Digital Portal
+              <div className="inline-flex items-center gap-2 rounded-full border border-[#F4B544]/40 bg-[#F4B544]/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-[#FFD783]">
+                <span className="h-2 w-2 rounded-full bg-[#F4B544]" />
+                Official Digital Service Portal
               </div>
 
-              <p className="mt-6 text-sm font-semibold uppercase tracking-[0.18em] text-teal-300">
+              <p className="mt-6 text-sm font-bold uppercase tracking-[0.18em] text-[#F4B544]">
                 {office?.name || "Government Office"}
               </p>
 
               <h1 className="mt-3 text-4xl font-black tracking-tight text-white sm:text-5xl lg:text-6xl">
                 Government
-                <span className="block text-teal-300">services made simpler.</span>
+                <span className="block text-[#F4B544]">
+                  services made simpler.
+                </span>
               </h1>
 
-              <p className="mt-5 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">
-                Select the service you need, check the live queue, and get a
-                virtual token before visiting the office.
+              <p className="mt-5 max-w-2xl text-base leading-7 text-blue-100 sm:text-lg">
+                Access public services with ease. Check live queue conditions
+                and get a virtual token before visiting your government office.
               </p>
 
-              {/* Quick benefits */}
+              {/* Key benefits */}
               <div className="mt-8 flex flex-wrap gap-3">
-                <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-200 backdrop-blur">
-                  <span className="text-teal-300">✓</span>
+                <div className="flex items-center gap-2 rounded-lg border border-white/15 bg-white/5 px-4 py-2 text-sm text-white backdrop-blur">
+                  <span className="font-black text-[#F4B544]">✓</span>
                   Less waiting
                 </div>
 
-                <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-200 backdrop-blur">
-                  <span className="text-teal-300">✓</span>
+                <div className="flex items-center gap-2 rounded-lg border border-white/15 bg-white/5 px-4 py-2 text-sm text-white backdrop-blur">
+                  <span className="font-black text-[#F4B544]">✓</span>
                   Live queue status
                 </div>
 
-                <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-200 backdrop-blur">
-                  <span className="text-teal-300">✓</span>
+                <div className="flex items-center gap-2 rounded-lg border border-white/15 bg-white/5 px-4 py-2 text-sm text-white backdrop-blur">
+                  <span className="font-black text-[#F4B544]">✓</span>
                   Virtual tokens
                 </div>
               </div>
             </div>
 
-            {/* Right status card */}
+            {/* Office status card */}
             <div className="w-full lg:w-[320px]">
-              <div className="rounded-3xl border border-white/10 bg-white/[0.08] p-5 shadow-2xl backdrop-blur-xl">
-                <div className="flex items-center justify-between">
+              <div className="rounded-2xl border border-white/20 bg-white/[0.08] p-5 shadow-2xl backdrop-blur-xl">
+                <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-300/10 text-xl">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#F4B544]/15 text-xl">
                       🏛️
                     </div>
 
                     <div>
-                      <p className="text-xs font-medium uppercase tracking-wider text-slate-400">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-blue-200">
                         Department
                       </p>
 
@@ -146,15 +148,15 @@ export default function Services({ user }) {
                     </div>
                   </div>
 
-                  <span className="flex items-center gap-1.5 rounded-full bg-emerald-400/15 px-3 py-1.5 text-xs font-bold text-emerald-300">
+                  <span className="flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-400/15 px-3 py-1.5 text-xs font-bold text-emerald-200">
                     <span className="h-2 w-2 rounded-full bg-emerald-400" />
                     Online
                   </span>
                 </div>
 
-                <div className="my-5 h-px bg-white/10" />
+                <div className="my-5 h-px bg-white/15" />
 
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <p className="text-xs font-semibold uppercase tracking-wider text-blue-200">
                   Available services
                 </p>
 
@@ -163,54 +165,55 @@ export default function Services({ user }) {
                     {loading ? "—" : services.length}
                   </span>
 
-                  <span className="mb-1 text-sm text-slate-400">
+                  <span className="mb-1 text-sm text-blue-200">
                     services
                   </span>
                 </div>
 
-                <div className="mt-5 flex items-center gap-2 text-xs text-teal-200">
-                  <span className="h-2 w-2 rounded-full bg-teal-300" />
+                <div className="mt-5 flex items-center gap-2 text-xs text-[#FFD783]">
+                  <span className="h-2 w-2 rounded-full bg-[#F4B544]" />
                   Choose a service to check its queue
                 </div>
               </div>
             </div>
           </div>
         </div>
+
+        {/* Saffron divider */}
+        <div className="relative h-1 bg-[#F4B544]" />
       </section>
 
-      {/* =========================================================
-          MAIN CONTENT
-      ========================================================= */}
+      {/* MAIN CONTENT */}
       <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         {/* Section heading */}
         <section className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
           <div>
             <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-teal-500" />
-              <p className="text-xs font-bold uppercase tracking-[0.16em] text-teal-700">
-                Select a service
+              <span className="h-2 w-2 rounded-full bg-[#F4B544]" />
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-[#15396B]">
+                Citizen services
               </p>
             </div>
 
-            <h2 className="mt-2 text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
+            <h2 className="mt-2 text-2xl font-black tracking-tight text-[#15396B] sm:text-3xl">
               What do you need today?
             </h2>
 
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-base">
-              Choose a service below to view the current queue and get your
-              virtual token.
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
+              Select a service to view the current queue and get your virtual
+              token.
             </p>
           </div>
 
-          {/* Peak Hours */}
+          {/* Peak hours */}
           <button
             type="button"
             onClick={() =>
               navigate(`/citizen/offices/${officeId}/crowd`)
             }
-            className="group inline-flex shrink-0 items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-teal-200 hover:text-teal-700 hover:shadow-md"
+            className="group inline-flex shrink-0 items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-[#15396B] shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-[#F4B544] hover:shadow-md"
           >
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-50 text-teal-700">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#15396B]/5 text-lg text-[#15396B]">
               ◷
             </span>
 
@@ -220,9 +223,7 @@ export default function Services({ user }) {
           </button>
         </section>
 
-        {/* =========================================================
-            ERROR
-        ========================================================= */}
+        {/* ERROR */}
         {error && (
           <div className="mt-8 overflow-hidden rounded-2xl border border-red-200 bg-white shadow-sm">
             <div className="border-l-4 border-red-500 bg-red-50 p-5">
@@ -243,46 +244,38 @@ export default function Services({ user }) {
           </div>
         )}
 
-        {/* =========================================================
-            LOADING
-        ========================================================= */}
+        {/* LOADING */}
         {loading && !error && (
           <div className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {[1, 2, 3].map((item) => (
               <div
                 key={item}
-                className="animate-pulse rounded-3xl border border-slate-200 bg-white p-6"
+                className="animate-pulse rounded-2xl border border-slate-200 bg-white p-6"
               >
-                <div className="h-12 w-12 rounded-2xl bg-slate-200" />
-
+                <div className="h-12 w-12 rounded-xl bg-slate-200" />
                 <div className="mt-6 h-6 w-3/4 rounded bg-slate-200" />
-
                 <div className="mt-3 h-4 w-full rounded bg-slate-100" />
                 <div className="mt-2 h-4 w-5/6 rounded bg-slate-100" />
-
                 <div className="mt-6 h-7 w-24 rounded-full bg-slate-100" />
-
                 <div className="mt-7 h-4 w-28 rounded bg-slate-200" />
               </div>
             ))}
           </div>
         )}
 
-        {/* =========================================================
-            EMPTY
-        ========================================================= */}
+        {/* EMPTY STATE */}
         {!loading && !error && services.length === 0 && (
-          <div className="mt-8 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+          <div className="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
             <div className="px-6 py-16 text-center sm:px-10">
-              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-slate-100 text-3xl">
+              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-[#15396B]/5 text-3xl">
                 📋
               </div>
 
-              <h3 className="mt-6 text-xl font-black text-slate-900">
+              <h3 className="mt-6 text-xl font-black text-[#15396B]">
                 No services available
               </h3>
 
-              <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
+              <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-600">
                 There are currently no active services available at this
                 office. Please check again later.
               </p>
@@ -290,7 +283,7 @@ export default function Services({ user }) {
               <button
                 type="button"
                 onClick={() => navigate("/citizen")}
-                className="mt-6 rounded-xl bg-slate-900 px-5 py-3 text-sm font-bold text-white transition hover:bg-slate-800"
+                className="mt-6 rounded-xl bg-[#15396B] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#102D56]"
               >
                 Return to offices
               </button>
@@ -298,9 +291,7 @@ export default function Services({ user }) {
           </div>
         )}
 
-        {/* =========================================================
-            SERVICE CARDS
-        ========================================================= */}
+        {/* SERVICE CARDS */}
         {!loading && !error && services.length > 0 && (
           <section className="mt-8">
             <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
@@ -317,24 +308,24 @@ export default function Services({ user }) {
                         `/citizen/offices/${officeId}/services/${service._id}/queue`
                       )
                     }
-                    className={`group relative overflow-hidden rounded-3xl border bg-white p-6 text-left transition-all duration-300 ${
+                    className={`group relative overflow-hidden rounded-2xl border bg-white p-6 text-left transition-all duration-300 ${
                       unavailable
                         ? "cursor-not-allowed border-slate-200 opacity-60"
-                        : "border-slate-200 shadow-sm hover:-translate-y-1.5 hover:border-teal-200 hover:shadow-xl"
+                        : "border-slate-200 shadow-sm hover:-translate-y-1 hover:border-[#F4B544] hover:shadow-lg"
                     }`}
                   >
                     {/* Top accent */}
                     {!unavailable && (
-                      <div className="absolute left-0 right-0 top-0 h-1 bg-gradient-to-r from-teal-500 via-emerald-400 to-blue-500 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                      <div className="absolute left-0 right-0 top-0 h-1 bg-gradient-to-r from-[#15396B] via-[#F4B544] to-[#15396B] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                     )}
 
                     {/* Card header */}
                     <div className="flex items-start justify-between">
                       <div
-                        className={`flex h-14 w-14 items-center justify-center rounded-2xl text-xl ${
+                        className={`flex h-14 w-14 items-center justify-center rounded-xl text-xl ${
                           unavailable
                             ? "bg-slate-100"
-                            : "bg-gradient-to-br from-teal-50 to-blue-50"
+                            : "bg-[#15396B]/5"
                         }`}
                       >
                         {index % 3 === 0
@@ -345,32 +336,32 @@ export default function Services({ user }) {
                       </div>
 
                       {!unavailable && (
-                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-50 text-slate-400 transition group-hover:bg-teal-50 group-hover:text-teal-600">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-50 text-slate-400 transition group-hover:bg-[#F4B544]/20 group-hover:text-[#15396B]">
                           →
                         </div>
                       )}
                     </div>
 
                     {/* Service name */}
-                    <h3 className="mt-6 text-xl font-black tracking-tight text-slate-900">
+                    <h3 className="mt-6 text-xl font-black tracking-tight text-[#15396B]">
                       {service.name}
                     </h3>
 
                     {/* Description */}
                     {service.description && (
-                      <p className="mt-2 min-h-[48px] text-sm leading-6 text-slate-500">
+                      <p className="mt-2 min-h-[48px] text-sm leading-6 text-slate-600">
                         {service.description}
                       </p>
                     )}
 
-                    {/* Service info */}
+                    {/* Service information */}
                     <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-5">
                       <div>
-                        <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                        <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
                           Service time
                         </p>
 
-                        <p className="mt-1 text-sm font-bold text-slate-700">
+                        <p className="mt-1 text-sm font-bold text-slate-800">
                           {service.averageServiceTime
                             ? `${service.averageServiceTime} min`
                             : "Varies"}
@@ -391,12 +382,12 @@ export default function Services({ user }) {
                       )}
                     </div>
 
-                    {/* CTA */}
+                    {/* Call to action */}
                     <div
                       className={`mt-5 flex items-center justify-between text-sm font-bold ${
                         unavailable
                           ? "text-slate-400"
-                          : "text-teal-700"
+                          : "text-[#15396B]"
                       }`}
                     >
                       <span>
@@ -418,29 +409,26 @@ export default function Services({ user }) {
           </section>
         )}
 
-        {/* =========================================================
-            BOTTOM INFORMATION / TRUST SECTION
-        ========================================================= */}
+        {/* OFFICIAL TRUST SECTION */}
         {!loading && !error && services.length > 0 && (
           <section className="mt-12">
-            <div className="overflow-hidden rounded-3xl bg-[#073b3a] shadow-xl">
+            <div className="overflow-hidden rounded-2xl bg-[#15396B] shadow-lg">
               <div className="relative px-6 py-8 sm:px-8 sm:py-9">
-                {/* Decorative circles */}
-                <div className="absolute -right-20 -top-20 h-56 w-56 rounded-full bg-teal-400/10 blur-2xl" />
-                <div className="absolute -bottom-20 left-1/3 h-48 w-48 rounded-full bg-blue-400/10 blur-2xl" />
+                <div className="absolute -right-20 -top-20 h-56 w-56 rounded-full bg-[#F4B544]/10 blur-2xl" />
+                <div className="absolute -bottom-20 left-1/3 h-48 w-48 rounded-full bg-white/5 blur-2xl" />
 
                 <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
                   <div>
-                    <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-teal-300">
-                      <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                      QueueLess
+                    <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-[#FFD783]">
+                      <span className="h-2 w-2 rounded-full bg-[#F4B544]" />
+                      QueueLess Citizen Services
                     </div>
 
                     <h2 className="mt-2 text-2xl font-black text-white">
                       Save time before you visit.
                     </h2>
 
-                    <p className="mt-2 max-w-xl text-sm leading-6 text-slate-300">
+                    <p className="mt-2 max-w-xl text-sm leading-6 text-blue-100">
                       Check queue conditions, choose your service, and arrive
                       closer to your turn instead of waiting at the office.
                     </p>
@@ -451,7 +439,7 @@ export default function Services({ user }) {
                     onClick={() =>
                       navigate(`/citizen/offices/${officeId}/crowd`)
                     }
-                    className="group inline-flex shrink-0 items-center justify-center gap-3 rounded-xl bg-white px-5 py-3.5 text-sm font-bold text-[#073b3a] shadow-lg transition hover:-translate-y-0.5 hover:bg-teal-50"
+                    className="group inline-flex shrink-0 items-center justify-center gap-3 rounded-xl bg-[#F4B544] px-5 py-3.5 text-sm font-extrabold text-[#15396B] shadow-md transition hover:-translate-y-0.5 hover:bg-[#FFD783]"
                   >
                     Check crowd levels
                     <span className="transition-transform group-hover:translate-x-1">
@@ -464,7 +452,6 @@ export default function Services({ user }) {
           </section>
         )}
 
-        {/* Footer spacing */}
         <div className="h-6" />
       </main>
     </div>

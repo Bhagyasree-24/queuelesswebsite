@@ -1,343 +1,583 @@
+
 import { Link } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 
+const services = [
+  {
+    title: "Resident Services",
+    description:
+      "Access identity documents, certificates and essential citizen services.",
+    image:
+      "https://www.thestatesman.com/wp-content/uploads/2021/10/QT-uidai-1024x683.jpg",
+    label: "Citizen Services",
+  },
+  {
+    title: "Licences & Permits",
+    description:
+      "Access passport services, licences, renewals and applications.",
+    image:
+      "https://img.inextlive.com/inext/Passport_p_160613.jpg",
+    label: "Official Documents",
+  },
+  {
+    title: "Public Services",
+    description:
+      "Connect with government offices and public service centres.",
+    image:
+      "https://lms24x7.s3.amazonaws.com/gsktestimonials/uploads/2023/01/03172042/All-About-CSC-2.0.png",
+    label: "Digital India",
+  },
+];
+
+const quickLinks = [
+  "Citizen Services",
+  "Aadhaar Services",
+  "Licensing",
+  "Public Records",
+  "Appointments",
+  "Help Centre",
+];
+
 export default function Landing() {
   return (
-    <div className="min-h-screen bg-slate-50 font-sans">
-      
-      {/* Top Government Alert Banner (Inspired by Martin County Portal) */}
-      <div className="bg-slate-900 text-teal-300 text-xs py-2 px-4 flex justify-between items-center border-b border-teal-800/40">
-        <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="bg-teal-500/20 text-teal-300 font-bold px-2 py-0.5 rounded text-[10px] uppercase tracking-wider">
-              System Announcement
+    <main className="min-h-screen overflow-hidden bg-[#f7f7f4] font-sans text-[#171717]">
+
+      {/* Announcement Bar */}
+      <div className="bg-[#171717] px-4 py-2 text-[10px] text-white sm:text-xs">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2">
+          <p className="flex flex-wrap items-center gap-2">
+            <span className="bg-[#efdf69] px-2 py-1 font-extrabold uppercase text-black">
+              QueueLess Update
             </span>
-            <span>Real-time queue tracking is currently active across all department branches.</span>
-          </div>
-          <a href="#how-it-works" className="underline text-teal-200 hover:text-white transition">Read Details &gt;</a>
+            Virtual queue tracking for convenient public services.
+          </p>
+
+          <a
+            href="#how-it-works"
+            className="font-semibold underline decoration-[#efdf69] underline-offset-4 hover:text-[#efdf69]"
+          >
+            Learn More →
+          </a>
         </div>
       </div>
 
+      {/* Existing Navbar */}
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden min-h-[640px]">
-        {/* Background Image with Government Portal Dark Teal Overlay */}
-        <div className="absolute inset-0 z-0">
-          <img
-            src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1920&q=80"
-            alt="Scenic Landscape Background"
-            className="w-full h-full object-cover object-center"
-          />
-          {/* Deep Teal to Slate Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-r from-emerald-950/90 via-teal-950/80 to-slate-900/70 backdrop-brightness-90" />
-        </div>
+      <section className="px-3 pb-8 pt-3 sm:px-6 lg:px-8">
+        <div className="relative mx-auto grid min-h-[520px] max-w-7xl overflow-hidden rounded-2xl bg-[#e8e7e1] lg:grid-cols-2">
 
-        <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-4 py-16 z-10 sm:px-6 lg:grid-cols-2 lg:px-8 lg:py-20">
+          {/* Hero Text */}
+          <div className="relative z-10 flex flex-col items-start justify-center px-6 py-12 sm:px-10 lg:px-14 lg:py-16">
 
-          {/* Hero Content */}
-          <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-teal-400/30 bg-teal-950/60 px-4 py-1.5 backdrop-blur-md">
-              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-xs font-semibold uppercase tracking-widest text-teal-200">
-                Official Digital Portal
+            <span className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white/80 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em]">
+              <span className="h-2 w-2 rounded-full bg-[#c8b632]" />
+              Digital Public Service Portal
+            </span>
+
+            <h1 className="mt-7 text-[clamp(3.1rem,6.5vw,5.6rem)] font-black uppercase leading-[0.83] tracking-[-0.075em]">
+              Skip the
+              <br />
+              queue.
+              <br />
+
+              <span className="relative z-0 inline-block px-1.5">
+                <span className="absolute inset-0 -z-10 -rotate-1 bg-[#efdf69]" />
+                Save your
               </span>
-            </div>
 
-            <h1 className="mt-6 max-w-2xl text-4xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
-              Skip the queue.
-              <span className="block text-teal-300 mt-1">
-                Save your time.
-              </span>
+              <br />
+              time.
             </h1>
 
-            <p className="mt-6 max-w-xl text-lg leading-relaxed text-teal-100/90">
-              Get a virtual token before visiting a government office.
-              Track your queue position and know approximately when your
-              turn will arrive.
+            <p className="mt-7 max-w-md text-sm leading-6 text-black/65 sm:text-base">
+              Get a virtual token before visiting a public service office.
+              Track your queue position and plan your visit without
+              unnecessary waiting.
             </p>
 
-            {/* Buttons */}
-            <div className="mt-8 flex flex-col gap-4 sm:flex-row">
+            <div className="mt-7 flex flex-wrap items-center gap-3">
               <Link
                 to="/login"
-                className="rounded-lg bg-teal-600 px-8 py-3.5 text-center font-bold text-white shadow-lg shadow-teal-950/50 transition hover:bg-teal-500 hover:-translate-y-0.5 active:translate-y-0"
+                className="inline-flex items-center rounded-md bg-black px-6 py-3 text-xs font-extrabold uppercase tracking-wide text-white transition hover:-translate-y-0.5 hover:bg-[#333]"
               >
                 Get a Token
+                <span className="ml-3 text-[#efdf69]">↗</span>
               </Link>
 
               <a
                 href="#how-it-works"
-                className="rounded-lg border border-teal-300/40 bg-white/10 px-8 py-3.5 text-center font-semibold text-white backdrop-blur-md shadow-sm transition hover:bg-white/20 hover:border-teal-200"
+                className="px-3 py-3 text-xs font-extrabold uppercase tracking-wide hover:text-[#8b7b0b]"
               >
-                How it works
+                How It Works →
               </a>
             </div>
 
-            {/* Small benefits */}
-            <div className="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-sm font-medium text-teal-200/90 border-t border-teal-500/20 pt-6">
-              <span className="flex items-center gap-1.5"><span className="text-teal-400">✓</span> Less waiting</span>
-              <span className="flex items-center gap-1.5"><span className="text-teal-400">✓</span> Live queue status</span>
-              <span className="flex items-center gap-1.5"><span className="text-teal-400">✓</span> Easy to use</span>
+            <div className="mt-8 flex flex-wrap gap-x-5 gap-y-3 border-t border-black/10 pt-5 text-xs font-medium text-black/65">
+              <span>✓ Less Waiting</span>
+              <span>✓ Live Queue Status</span>
+              <span>✓ Easy Access</span>
             </div>
           </div>
 
-          {/* Queue Preview Card */}
-          <div className="relative mx-auto w-full max-w-md">
+          {/* Indian Public Service Image */}
+          <div className="relative min-h-[340px] overflow-hidden lg:min-h-full">
+            <img
+              src="https://www.thestatesman.com/wp-content/uploads/2021/10/QT-uidai-1024x683.jpg"
+              alt="Indian Aadhaar Seva Kendra public service centre"
+              className="absolute inset-0 h-full w-full object-cover"
+            />
 
-            {/* Glassmorphism Outer Backdrop */}
-            <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-teal-500/30 to-emerald-500/30 blur-xl" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/5 to-transparent" />
 
-            <div className="relative rounded-2xl border border-white/20 bg-white/95 p-6 shadow-2xl backdrop-blur-xl">
+            <div className="absolute right-5 top-5 rounded-full border border-white/60 bg-white/80 px-3 py-2 text-[9px] font-extrabold uppercase tracking-widest backdrop-blur">
+              Citizen First
+            </div>
 
-              {/* Card Header */}
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-teal-50 text-2xl border border-teal-100">
-                    🏛️
-                  </div>
+            {/* Yellow Decorative Shape */}
+            <div className="absolute -bottom-20 -left-12 h-64 w-64 rounded-full bg-[#efdf69]/70 mix-blend-screen sm:h-80 sm:w-80" />
 
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                      Current queue
-                    </p>
+            {/* Queue Preview */}
+            <div className="absolute bottom-5 right-4 flex items-center gap-3 rounded-xl bg-white px-3 py-3 shadow-2xl sm:bottom-8 sm:right-8 sm:px-5">
 
-                    <h2 className="font-bold text-slate-900 text-lg">
-                      Service Counter
-                    </h2>
-                  </div>
-                </div>
+              <span className="flex h-9 w-9 items-center justify-center rounded-md bg-[#efdf69] text-lg">
+                ▦
+              </span>
 
-                <span className="flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800">
-                  <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                  Live
-                </span>
-              </div>
-
-              <div className="my-6 h-px bg-slate-100" />
-
-              {/* Token */}
-              <div className="text-center rounded-xl bg-slate-50/80 p-4 border border-slate-100">
-                <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
+              <div className="border-r border-black/10 pr-3">
+                <p className="text-[9px] font-bold uppercase tracking-wider text-black/50">
                   Your Token
                 </p>
+                <p className="text-lg font-black">A-024</p>
+              </div>
 
-                <p className="mt-1 text-6xl font-extrabold tracking-tight text-teal-700">
-                  A-24
+              <div>
+                <p className="text-[9px] font-bold uppercase tracking-wider text-black/50">
+                  Estimated Wait
+                </p>
+                <p className="text-lg font-black">
+                  20 <span className="text-xs font-semibold">min</span>
                 </p>
               </div>
-
-              {/* Stats */}
-              <div className="mt-6 grid grid-cols-2 gap-4">
-
-                <div className="rounded-xl bg-teal-50/60 p-4 border border-teal-100/60">
-                  <p className="text-xs font-medium text-slate-500">
-                    People ahead
-                  </p>
-
-                  <p className="mt-1 text-3xl font-bold text-slate-900">
-                    8
-                  </p>
-                </div>
-
-                <div className="rounded-xl bg-emerald-50/60 p-4 border border-emerald-100/60">
-                  <p className="text-xs font-medium text-slate-500">
-                    Estimated wait
-                  </p>
-
-                  <p className="mt-1 text-3xl font-bold text-slate-900">
-                    20
-                    <span className="ml-1 text-base font-normal text-slate-600">
-                      min
-                    </span>
-                  </p>
-                </div>
-
-              </div>
-
-              {/* Progress Bar */}
-              <div className="mt-6">
-                <div className="flex gap-1.5 p-1 rounded-full bg-slate-100">
-                  <span className="h-2 flex-1 rounded-full bg-teal-600" />
-                  <span className="h-2 flex-1 rounded-full bg-teal-500" />
-                  <span className="h-2 flex-1 rounded-full bg-emerald-500" />
-                  <span className="h-2 flex-1 rounded-full bg-slate-200" />
-                  <span className="h-2 flex-1 rounded-full bg-slate-200" />
-                </div>
-
-                <p className="mt-3 flex items-center gap-2 text-xs font-semibold text-teal-800">
-                  <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                  Queue is moving normally
-                </p>
-              </div>
-
             </div>
           </div>
         </div>
-
-       
       </section>
 
-      {/* How it works */}
+      {/* Yellow Service Navigation */}
+      <nav
+        aria-label="Service categories"
+        className="bg-[#efdf69] px-4 py-4 sm:px-6 lg:px-8"
+      >
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-5 gap-y-3">
+          {quickLinks.map((item) => (
+            <a
+              key={item}
+              href="#popular-services"
+              className="text-[9px] font-extrabold uppercase tracking-wide transition hover:underline hover:underline-offset-4 sm:text-[10px]"
+            >
+              <span className="mr-2">▣</span>
+              {item}
+            </a>
+          ))}
+        </div>
+      </nav>
+
+      {/* Popular Services */}
+      <section
+        id="popular-services"
+        className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-20 lg:px-8"
+      >
+        <div className="mb-8 flex items-end justify-between gap-4">
+          <div>
+            <p className="mb-2 text-[10px] font-extrabold uppercase tracking-[0.2em] text-black/55">
+              Start Here
+            </p>
+
+            <h2 className="text-3xl font-black uppercase tracking-[-0.055em] sm:text-4xl">
+              Popular{" "}
+              <span className="underline decoration-[#efdf69] decoration-[7px] underline-offset-[-2px]">
+                Services
+              </span>
+            </h2>
+          </div>
+
+          <a
+            href="#how-it-works"
+            className="shrink-0 text-[9px] font-extrabold uppercase tracking-wide hover:underline"
+          >
+            Explore Services →
+          </a>
+        </div>
+
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {services.map((service) => (
+            <a
+              href="#how-it-works"
+              key={service.title}
+              className="group block min-w-0"
+            >
+              <div className="overflow-hidden rounded-xl bg-[#e6e4dc]">
+                <img
+                  src={service.image}
+                  alt={service.label}
+                  className="h-52 w-full object-cover transition duration-500 group-hover:scale-105 sm:h-56"
+                  loading="lazy"
+                />
+              </div>
+
+              <div className="flex items-start justify-between gap-3 pt-4">
+                <div>
+                  <p className="mb-1 text-[9px] font-bold uppercase tracking-widest text-black/45">
+                    {service.label}
+                  </p>
+
+                  <h3 className="text-base font-extrabold tracking-tight">
+                    {service.title}
+                  </h3>
+
+                  <p className="mt-2 text-xs leading-5 text-black/55">
+                    {service.description}
+                  </p>
+                </div>
+
+                <span className="mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-black/20 text-sm transition group-hover:border-black group-hover:bg-black group-hover:text-white">
+                  →
+                </span>
+              </div>
+            </a>
+          ))}
+        </div>
+      </section>
+
+      {/* How It Works */}
       <section
         id="how-it-works"
-        className="bg-white pt-24 pb-20 border-b border-slate-100"
+        className="border-y border-black/5 bg-white px-4 py-14 sm:px-6 sm:py-20 lg:px-8"
       >
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-
-          <div className="text-center">
-            <span className="rounded-full bg-teal-100 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-teal-800">
+        <div className="mx-auto max-w-7xl">
+          <div className="max-w-2xl">
+            <p className="mb-3 text-[10px] font-extrabold uppercase tracking-[0.2em] text-black/55">
               Simple Process
-            </span>
+            </p>
 
-            <h2 className="mt-4 text-3xl font-extrabold text-slate-900 sm:text-4xl">
-              How QueueLess{" "}
-              <span className="text-teal-700">works</span>
+            <h2 className="text-3xl font-black uppercase leading-[0.95] tracking-[-0.06em] sm:text-5xl">
+              A Few Steps.
+              <br />
+              <span className="text-[#9b8b13]">
+                A Lot Less Waiting.
+              </span>
             </h2>
 
-            <p className="mx-auto mt-3 max-w-2xl text-slate-600">
-              Get your virtual token in just a few simple steps.
+            <p className="mt-4 max-w-lg text-sm leading-6 text-black/60">
+              Get your virtual token in a few simple steps and follow
+              your queue remotely.
             </p>
           </div>
 
-          <div className="mt-14 grid gap-8 md:grid-cols-3">
-
+          <div className="mt-10 grid gap-4 md:grid-cols-3">
             <Step
               number="01"
-              title="Choose an office"
+              title="Choose an Office"
               description="Select the government office you need to visit."
-              color="teal"
             />
 
             <Step
               number="02"
-              title="Choose a service"
+              title="Choose a Service"
               description="Select the service you want from that office."
-              color="emerald"
             />
 
             <Step
               number="03"
-              title="Get your token"
+              title="Get Your Token"
               description="Take a virtual token and track your queue remotely."
-              color="cyan"
             />
-
           </div>
+        </div>
+      </section>
+
+      {/* Indian Government Building CTA */}
+      <section className="grid bg-[#efdf69] lg:min-h-[430px] lg:grid-cols-2">
+
+        <div className="relative min-h-[280px] overflow-hidden lg:min-h-full">
+          <img
+            src="https://resize.indiatvnews.com/en/resize/newbucket/1200_-/2022/11/parliament-winter-session-pti-1668189242.jpg"
+            alt="Indian Parliament House in New Delhi"
+            className="absolute inset-0 h-full w-full object-cover grayscale"
+            loading="lazy"
+          />
+
+          <div className="absolute inset-0 bg-[#b6a52a]/45 mix-blend-multiply" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/45 to-transparent" />
+        </div>
+
+        <div className="flex flex-col items-start justify-center px-6 py-12 sm:px-10 sm:py-16 lg:px-14">
+          <p className="text-[10px] font-extrabold uppercase tracking-[0.2em]">
+            Your Time Matters
+          </p>
+
+          <h2 className="mt-4 max-w-xl text-4xl font-black uppercase leading-[0.88] tracking-[-0.07em] sm:text-6xl">
+            Join the
+            <br />
+            Queue From
+            <br />
+            Anywhere.
+          </h2>
+
+          <p className="mt-5 max-w-md text-sm leading-6 text-black/75">
+            Choose a service, reserve your place and continue with your day.
+            Plan your visit and reduce unnecessary waiting at public offices.
+          </p>
+
+          <p className="mt-4 text-[10px] font-extrabold uppercase tracking-wide">
+            A Smarter Way to Access Services
+            <span className="mt-1 block font-medium normal-case tracking-normal text-black/65">
+              For participating public service centres
+            </span>
+          </p>
+
+          <Link
+            to="/login"
+            className="mt-6 inline-flex items-center rounded-md bg-black px-6 py-3 text-xs font-extrabold uppercase tracking-wide text-white transition hover:-translate-y-0.5 hover:bg-[#333]"
+          >
+            Get Started
+            <span className="ml-3 text-[#efdf69]">↗</span>
+          </Link>
         </div>
       </section>
 
       {/* Features */}
-      <section className="bg-slate-50 py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-20 lg:px-8">
+        <div className="mb-8">
+          <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-black/55">
+            Built for Simpler Visits
+          </p>
 
-          <div className="text-center">
-            <h2 className="text-3xl font-extrabold text-slate-900">
-              Everything you need to wait smarter
-            </h2>
+          <h2 className="mt-3 text-3xl font-black uppercase tracking-[-0.055em] sm:text-4xl">
+            Wait Smarter.
+          </h2>
+        </div>
 
-            <p className="mt-3 text-slate-600">
-              QueueLess makes government office visits simpler.
-            </p>
-          </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Feature
+            title="Virtual Token"
+            description="Get your place in the queue without standing there."
+            icon="01"
+          />
 
-          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <Feature
+            title="Live Queue"
+            description="See how many people are currently ahead of you."
+            icon="02"
+          />
 
-            <Feature
-              title="Virtual Token"
-              description="Get your place in the queue without standing there."
-              borderAccent="border-emerald-500"
-              icon="🎟️"
-            />
+          <Feature
+            title="Estimated Wait"
+            description="Get an approximate idea of your waiting time."
+            icon="03"
+          />
 
-            <Feature
-              title="Live Queue"
-              description="See how many people are currently ahead of you."
-              borderAccent="border-teal-500"
-              icon="📊"
-            />
-
-            <Feature
-              title="Estimated Wait"
-              description="Get an approximate idea of your waiting time."
-              borderAccent="border-amber-500"
-              icon="⏱️"
-            />
-
-            <Feature
-              title="Turn Alerts"
-              description="Know when your turn is getting closer."
-              borderAccent="border-teal-600"
-              icon="🔔"
-            />
-
-          </div>
+          <Feature
+            title="Turn Alerts"
+            description="Know when your turn is getting closer."
+            icon="04"
+          />
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-teal-900 bg-slate-950 text-slate-400">
-        <div className="mx-auto max-w-7xl px-4 py-8 text-center text-sm sm:px-6 lg:px-8">
-          <p className="font-semibold text-slate-200">QueueLess — Smart Virtual Queue Management</p>
-          <p className="mt-1 text-xs text-slate-500">Official Portal for Resident Services &amp; Online Appointment Systems</p>
+      {/* COMPLETE FOOTER */}
+      <footer className="bg-[#171717] text-white">
+
+        {/* Tricolour Accent */}
+        <div className="grid h-1 grid-cols-3">
+          <div className="bg-[#ff9933]" />
+          <div className="bg-white" />
+          <div className="bg-[#138808]" />
+        </div>
+
+        {/* Main Footer */}
+        <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8 lg:py-16">
+
+          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+
+            {/* Brand */}
+            <div>
+              <Link
+                to="/"
+                className="inline-flex items-center gap-2"
+              >
+                <span className="flex h-10 w-10 items-center justify-center rounded-md bg-[#efdf69] text-xl text-black">
+                  ▦
+                </span>
+
+                <span className="text-xl font-black uppercase tracking-tight">
+                  QueueLess
+                </span>
+              </Link>
+
+              <p className="mt-5 max-w-xs text-sm leading-6 text-white/60">
+                A smarter way to plan public service visits, get virtual
+                tokens and spend less time waiting in queues.
+              </p>
+
+              <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-white/15 px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-white/75">
+                <span className="h-2 w-2 rounded-full bg-[#138808]" />
+                Digital Queue Management
+              </div>
+            </div>
+
+            {/* Quick Links */}
+            <div>
+              <h3 className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#efdf69]">
+                Quick Links
+              </h3>
+
+              <ul className="mt-5 space-y-3 text-sm text-white/65">
+                <li>
+                  <Link to="/" className="transition hover:text-white">
+                    Home
+                  </Link>
+                </li>
+
+                <li>
+                  <a href="#popular-services" className="transition hover:text-white">
+                    Popular Services
+                  </a>
+                </li>
+
+                <li>
+                  <a href="#how-it-works" className="transition hover:text-white">
+                    How It Works
+                  </a>
+                </li>
+
+                <li>
+                  <Link to="/login" className="transition hover:text-white">
+                    Get a Token
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Services */}
+            <div>
+              <h3 className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#efdf69]">
+                Citizen Services
+              </h3>
+
+              <ul className="mt-5 space-y-3 text-sm text-white/65">
+                <li>
+                  <a href="#popular-services" className="transition hover:text-white">
+                    Aadhaar Services
+                  </a>
+                </li>
+
+                <li>
+                  <a href="#popular-services" className="transition hover:text-white">
+                    Passport Services
+                  </a>
+                </li>
+
+                <li>
+                  <a href="#popular-services" className="transition hover:text-white">
+                    Licences & Permits
+                  </a>
+                </li>
+
+                <li>
+                  <a href="#popular-services" className="transition hover:text-white">
+                    Public Records
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Contact */}
+            <div>
+              <h3 className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#efdf69]">
+                Help & Support
+              </h3>
+
+              <p className="mt-5 text-sm leading-6 text-white/60">
+                Need assistance with the portal or your virtual token?
+                Visit the available support section.
+              </p>
+
+              <a
+                href="#how-it-works"
+                className="mt-5 inline-flex items-center gap-2 text-xs font-extrabold uppercase tracking-wide text-white transition hover:text-[#efdf69]"
+              >
+                View Help Guide →
+              </a>
+            </div>
+          </div>
+
+          {/* Footer Bottom */}
+          <div className="mt-12 border-t border-white/15 pt-6">
+
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+
+              <p className="text-xs leading-5 text-white/50">
+                © {new Date().getFullYear()} QueueLess. All rights reserved.
+              </p>
+
+              <div className="flex flex-wrap gap-x-5 gap-y-2 text-xs text-white/50">
+                <a href="#top" className="transition hover:text-white">
+                  Back to Top ↑
+                </a>
+
+                <Link to="/login" className="transition hover:text-white">
+                  Sign In
+                </Link>
+              </div>
+            </div>
+
+            <p className="mt-4 max-w-3xl text-[10px] leading-5 text-white/35">
+              QueueLess is a virtual queue management project. It is not an
+              official Government of India website and is not affiliated
+              with any government department.
+            </p>
+          </div>
         </div>
       </footer>
-    </div>
+    </main>
   );
 }
-
 
 /* Step Component */
-
-function Step({ number, title, description, color }) {
-  const colors = {
-    teal: "bg-teal-100 text-teal-800 border-teal-200",
-    emerald: "bg-emerald-100 text-emerald-800 border-emerald-200",
-    cyan: "bg-cyan-100 text-cyan-800 border-cyan-200",
-  };
-
+function Step({ number, title, description }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md hover:border-teal-200">
-      <div className="flex items-start gap-4">
+    <div className="border-t-2 border-[#efdf69] bg-[#f7f7f4] p-6 transition hover:-translate-y-1">
+      <p className="text-xs font-black tracking-widest text-black/45">
+        {number}
+      </p>
 
-        <div
-          className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border font-bold text-lg ${colors[color]}`}
-        >
-          {number}
-        </div>
-
-        <div>
-          <h3 className="text-lg font-bold text-slate-900">
-            {title}
-          </h3>
-
-          <p className="mt-2 text-sm leading-relaxed text-slate-600">
-            {description}
-          </p>
-        </div>
-
-      </div>
-    </div>
-  );
-}
-
-
-/* Feature Component */
-
-function Feature({ title, description, borderAccent, icon }) {
-  return (
-    <div
-      className={`rounded-xl border-t-4 ${borderAccent} border-x border-b border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md`}
-    >
-      <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-slate-100 text-xl shadow-inner">
-        {icon}
-      </div>
-
-      <h3 className="mt-5 font-bold text-slate-900 text-base">
+      <h3 className="mt-5 text-lg font-extrabold">
         {title}
       </h3>
 
-      <p className="mt-2 text-sm leading-relaxed text-slate-600">
+      <p className="mt-2 text-sm leading-6 text-black/60">
+        {description}
+      </p>
+    </div>
+  );
+}
+
+/* Feature Component */
+function Feature({ title, description, icon }) {
+  return (
+    <div className="border border-black/10 bg-white p-5 transition hover:border-black/40">
+      <div className="flex h-9 w-9 items-center justify-center bg-[#efdf69] text-xs font-black">
+        {icon}
+      </div>
+
+      <h3 className="mt-5 font-extrabold">
+        {title}
+      </h3>
+
+      <p className="mt-2 text-sm leading-6 text-black/60">
         {description}
       </p>
     </div>

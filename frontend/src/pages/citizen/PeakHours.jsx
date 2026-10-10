@@ -1,3 +1,4 @@
+
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import CitizenNavbar from "../../components/citizen/CitizenNavbar";
@@ -12,13 +13,7 @@ import {
 
 function ArrowLeftIcon({ className = "h-4 w-4" }) {
   return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-    >
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <path d="M19 12H5" />
       <path d="m12 19-7-7 7-7" />
     </svg>
@@ -27,13 +22,7 @@ function ArrowLeftIcon({ className = "h-4 w-4" }) {
 
 function ArrowRightIcon({ className = "h-4 w-4" }) {
   return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-    >
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <path d="M5 12h14" />
       <path d="m13 6 6 6-6 6" />
     </svg>
@@ -42,13 +31,7 @@ function ArrowRightIcon({ className = "h-4 w-4" }) {
 
 function BuildingIcon({ className = "h-6 w-6" }) {
   return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.7"
-    >
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
       <path d="M4 21h16" />
       <path d="M6 21V6l6-3 6 3v15" />
       <path d="M9 9h1" />
@@ -63,13 +46,7 @@ function BuildingIcon({ className = "h-6 w-6" }) {
 
 function ClockIcon({ className = "h-5 w-5" }) {
   return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-    >
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
       <circle cx="12" cy="12" r="8.5" />
       <path d="M12 7v5l3 2" />
     </svg>
@@ -78,13 +55,7 @@ function ClockIcon({ className = "h-5 w-5" }) {
 
 function CalendarIcon({ className = "h-5 w-5" }) {
   return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-    >
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
       <rect x="4" y="5" width="16" height="15" rx="2" />
       <path d="M8 3v4M16 3v4M4 10h16" />
     </svg>
@@ -93,13 +64,7 @@ function CalendarIcon({ className = "h-5 w-5" }) {
 
 function ChartIcon({ className = "h-5 w-5" }) {
   return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-    >
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
       <path d="M4 19V5" />
       <path d="M4 19h16" />
       <path d="m7 15 3-4 3 2 4-6" />
@@ -109,13 +74,7 @@ function ChartIcon({ className = "h-5 w-5" }) {
 
 function SparkIcon({ className = "h-5 w-5" }) {
   return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-    >
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
       <path d="m12 3 1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5L12 3Z" />
       <path d="m19 16 .6 2.4L22 19l-2.4.6L19 22l-.6-2.4L16 19l2.4-.6L19 16Z" />
     </svg>
@@ -124,13 +83,7 @@ function SparkIcon({ className = "h-5 w-5" }) {
 
 function InfoIcon({ className = "h-4 w-4" }) {
   return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-    >
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
       <circle cx="12" cy="12" r="9" />
       <path d="M12 10v6" />
       <path d="M12 7h.01" />
@@ -151,9 +104,7 @@ export default function PeakHours({ user }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  /* -------------------------------------------------------
-     Existing API functionality - unchanged
-  ------------------------------------------------------- */
+  /* API functionality - unchanged */
 
   useEffect(() => {
     async function loadPeakHours() {
@@ -188,9 +139,7 @@ export default function PeakHours({ user }) {
     }
   }, [officeId]);
 
-  /* -------------------------------------------------------
-     Existing helper - unchanged
-  ------------------------------------------------------- */
+  /* Existing hour formatting */
 
   function formatHourSlot(hourInt) {
     const h = Number(hourInt);
@@ -205,9 +154,7 @@ export default function PeakHours({ user }) {
     return `${start12}:00 ${startPeriod} – ${end12}:00 ${endPeriod}`;
   }
 
-  /* -------------------------------------------------------
-     Existing crowd calculation - unchanged
-  ------------------------------------------------------- */
+  /* Existing crowd-level calculation */
 
   function getCrowdLevel(count) {
     if (count <= 5) {
@@ -236,17 +183,15 @@ export default function PeakHours({ user }) {
     };
   }
 
-  /* -------------------------------------------------------
-     Existing lowest slot functionality
-  ------------------------------------------------------- */
+  /* Existing lowest-slot calculation */
 
   const lowestSlot = peakHoursData.length
-    ? [...peakHoursData].sort((a, b) => a.tokenCount - b.tokenCount)[0]
+    ? [...peakHoursData].sort(
+        (a, b) => a.tokenCount - b.tokenCount
+      )[0]
     : null;
 
-  /* -------------------------------------------------------
-     UI helper values
-  ------------------------------------------------------- */
+  /* Summary values */
 
   const maxTokens = useMemo(() => {
     if (!peakHoursData.length) return 1;
@@ -277,74 +222,67 @@ export default function PeakHours({ user }) {
   }, [peakHoursData]);
 
   return (
-    <div className="min-h-screen bg-[#f4f7f7] text-slate-900">
-      {/* =====================================================
-          TOP ANNOUNCEMENT
-      ===================================================== */}
+    <div className="min-h-screen bg-[#F7F8FA] text-slate-900">
+      {/* TOP ANNOUNCEMENT */}
 
-      <div className="border-b border-[#153b3a] bg-[#0b2528]">
+      <div className="border-b border-[#254875] bg-[#102C52]">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-2.5 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3">
-            <span className="inline-flex items-center gap-2 rounded-full border border-teal-500/30 bg-teal-400/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-teal-300">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+            <span className="inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-amber-300">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
               System active
             </span>
 
             <p className="hidden text-xs font-medium text-slate-300 sm:block">
-              Real-time queue insights are available for this government
-              office.
+              Real-time queue insights are available for this government office.
             </p>
           </div>
 
-          <span className="hidden text-xs font-semibold text-teal-300 sm:block">
+          <span className="hidden text-xs font-semibold text-amber-300 sm:block">
             Official citizen portal
           </span>
         </div>
       </div>
 
-      {/* Existing navbar */}
       <CitizenNavbar user={user} />
 
-      {/* =====================================================
-          HERO
-      ===================================================== */}
+      {/* HERO */}
 
-      <section className="relative overflow-hidden bg-[#0c3433]">
-        {/* Background decoration */}
+      <section className="relative overflow-hidden bg-[#15396B]">
         <div className="absolute inset-0">
-          <div className="absolute -left-24 -top-32 h-96 w-96 rounded-full bg-teal-400/10 blur-3xl" />
-          <div className="absolute right-0 top-0 h-96 w-96 rounded-full bg-cyan-400/10 blur-3xl" />
-          <div className="absolute bottom-0 left-1/2 h-72 w-72 rounded-full bg-emerald-300/5 blur-3xl" />
+          <div className="absolute -left-24 -top-32 h-96 w-96 rounded-full bg-amber-400/10 blur-3xl" />
+          <div className="absolute right-0 top-0 h-96 w-96 rounded-full bg-blue-300/10 blur-3xl" />
+          <div className="absolute bottom-0 left-1/2 h-72 w-72 rounded-full bg-amber-200/5 blur-3xl" />
         </div>
 
         <div className="relative mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8 lg:py-16">
-          {/* Back */}
           <button
             type="button"
             onClick={() =>
               navigate(`/citizen/offices/${officeId}/services`)
             }
-            className="mb-8 inline-flex items-center gap-2 rounded-lg text-sm font-semibold text-slate-300 transition hover:text-white"
+            className="mb-8 inline-flex items-center gap-2 rounded-lg text-sm font-semibold text-slate-300 transition hover:text-amber-300"
           >
-            <ArrowLeftIcon className="h-4 w-4" />
+            <ArrowLeftIcon />
             Back to services
           </button>
 
           <div className="grid items-center gap-10 lg:grid-cols-[1.1fr_0.9fr]">
             {/* Hero text */}
+
             <div className="max-w-2xl">
-              <div className="inline-flex items-center gap-2 rounded-full border border-teal-400/30 bg-white/5 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-teal-200 backdrop-blur">
-                <span className="h-2 w-2 rounded-full bg-emerald-400" />
+              <div className="inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-white/5 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-amber-300 backdrop-blur">
+                <span className="h-2 w-2 rounded-full bg-amber-400" />
                 Crowd intelligence
               </div>
 
-              <p className="mt-6 text-sm font-semibold text-teal-200">
+              <p className="mt-6 text-sm font-semibold text-amber-300">
                 {office?.name || "Government Office"}
               </p>
 
               <h1 className="mt-2 text-4xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
                 Plan your visit.
-                <span className="block text-teal-300">
+                <span className="block text-[#F4B544]">
                   Avoid the crowd.
                 </span>
               </h1>
@@ -360,28 +298,29 @@ export default function PeakHours({ user }) {
                   onClick={() =>
                     navigate(`/citizen/offices/${officeId}/services`)
                   }
-                  className="inline-flex items-center gap-2 rounded-xl bg-teal-400 px-6 py-3.5 text-sm font-bold text-[#073c3b] shadow-lg shadow-teal-950/20 transition hover:-translate-y-0.5 hover:bg-teal-300"
+                  className="inline-flex items-center gap-2 rounded-xl bg-[#F4B544] px-6 py-3.5 text-sm font-bold text-[#15396B] shadow-lg shadow-black/10 transition hover:-translate-y-0.5 hover:bg-amber-300"
                 >
                   Select a service
-                  <ArrowRightIcon className="h-4 w-4" />
+                  <ArrowRightIcon />
                 </button>
 
                 <div className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-5 py-3.5 text-sm font-medium text-slate-300 backdrop-blur">
-                  <ChartIcon className="h-4 w-4 text-teal-300" />
+                  <ChartIcon className="text-amber-300" />
                   Historical activity
                 </div>
               </div>
             </div>
 
             {/* Hero summary card */}
-            <div className="relative">
-              <div className="absolute -inset-4 rounded-[2rem] bg-teal-400/10 blur-2xl" />
 
-              <div className="relative overflow-hidden rounded-[1.75rem] border border-white/20 bg-[#f8fbfa] shadow-2xl">
+            <div className="relative">
+              <div className="absolute -inset-4 rounded-[2rem] bg-amber-400/10 blur-2xl" />
+
+              <div className="relative overflow-hidden rounded-[1.75rem] border border-white/30 bg-[#F7F8FA] shadow-2xl">
                 <div className="border-b border-slate-200 px-6 py-5 sm:px-7">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-teal-100 bg-teal-50 text-[#087c78]">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-blue-100 bg-blue-50 text-[#15396B]">
                         <ChartIcon />
                       </div>
 
@@ -389,7 +328,6 @@ export default function PeakHours({ user }) {
                         <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500">
                           Queue overview
                         </p>
-
                         <p className="mt-0.5 font-bold text-slate-900">
                           Office activity
                         </p>
@@ -406,10 +344,10 @@ export default function PeakHours({ user }) {
                 <div className="p-6 sm:p-7">
                   {loading ? (
                     <div className="space-y-4">
-                      <div className="h-24 animate-pulse rounded-2xl bg-slate-100" />
+                      <div className="h-24 animate-pulse rounded-2xl bg-slate-200" />
                       <div className="grid grid-cols-2 gap-3">
-                        <div className="h-20 animate-pulse rounded-2xl bg-slate-100" />
-                        <div className="h-20 animate-pulse rounded-2xl bg-slate-100" />
+                        <div className="h-20 animate-pulse rounded-2xl bg-slate-200" />
+                        <div className="h-20 animate-pulse rounded-2xl bg-slate-200" />
                       </div>
                     </div>
                   ) : error ? (
@@ -418,9 +356,9 @@ export default function PeakHours({ user }) {
                     </div>
                   ) : lowestSlot ? (
                     <>
-                      <div className="rounded-2xl border border-teal-100 bg-[#edf8f6] p-5">
-                        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.12em] text-[#087c78]">
-                          <SparkIcon className="h-4 w-4" />
+                      <div className="rounded-2xl border border-amber-200 bg-[#FFF7E6] p-5">
+                        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.12em] text-[#15396B]">
+                          <SparkIcon className="text-amber-600" />
                           Recommended
                         </div>
 
@@ -438,11 +376,9 @@ export default function PeakHours({ user }) {
                           <p className="text-xs font-semibold text-slate-500">
                             Average activity
                           </p>
-
-                          <p className="mt-1 text-2xl font-extrabold text-slate-900">
+                          <p className="mt-1 text-2xl font-extrabold text-[#15396B]">
                             {averageTokens}
                           </p>
-
                           <p className="text-[11px] text-slate-500">
                             tokens / hour
                           </p>
@@ -452,11 +388,9 @@ export default function PeakHours({ user }) {
                           <p className="text-xs font-semibold text-slate-500">
                             High crowd slots
                           </p>
-
-                          <p className="mt-1 text-2xl font-extrabold text-slate-900">
+                          <p className="mt-1 text-2xl font-extrabold text-[#15396B]">
                             {highCrowdSlots}
                           </p>
-
                           <p className="text-[11px] text-slate-500">
                             above 12 tokens
                           </p>
@@ -466,11 +400,9 @@ export default function PeakHours({ user }) {
                   ) : (
                     <div className="py-6 text-center">
                       <ChartIcon className="mx-auto h-8 w-8 text-slate-300" />
-
                       <p className="mt-3 text-sm font-semibold text-slate-700">
                         No activity data yet
                       </p>
-
                       <p className="mt-1 text-xs text-slate-500">
                         Historical queue data will appear here.
                       </p>
@@ -483,21 +415,20 @@ export default function PeakHours({ user }) {
         </div>
       </section>
 
-      {/* =====================================================
-          MAIN CONTENT
-      ===================================================== */}
+      {/* MAIN CONTENT */}
 
       <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
         {/* Page intro */}
+
         <section>
           <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
             <div>
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-[#087c78]">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#087c78]" />
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-[#15396B]">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#F4B544]" />
                 Crowd forecast
               </div>
 
-              <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-slate-900">
+              <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-[#15396B]">
                 Understand the queue
               </h2>
 
@@ -509,16 +440,14 @@ export default function PeakHours({ user }) {
 
             {!loading && !error && peakHoursData.length > 0 && (
               <div className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 shadow-sm">
-                <CalendarIcon className="h-4 w-4 text-[#087c78]" />
+                <CalendarIcon className="text-[#15396B]" />
                 {peakHoursData.length} time slots
               </div>
             )}
           </div>
         </section>
 
-        {/* =================================================
-            ERROR
-        ================================================= */}
+        {/* ERROR */}
 
         {error && (
           <section className="mt-8 rounded-3xl border border-red-200 bg-red-50 p-6 sm:p-8">
@@ -526,12 +455,10 @@ export default function PeakHours({ user }) {
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-red-100 font-bold text-red-600">
                 !
               </div>
-
               <div>
                 <h3 className="font-bold text-red-900">
                   Unable to load crowd information
                 </h3>
-
                 <p className="mt-1 text-sm leading-6 text-red-700">
                   {error}
                 </p>
@@ -540,9 +467,7 @@ export default function PeakHours({ user }) {
           </section>
         )}
 
-        {/* =================================================
-            LOADING
-        ================================================= */}
+        {/* LOADING */}
 
         {loading && !error && (
           <section className="mt-8">
@@ -575,73 +500,60 @@ export default function PeakHours({ user }) {
           </section>
         )}
 
-        {/* =================================================
-            DATA CONTENT
-        ================================================= */}
+        {/* DATA CONTENT */}
 
         {!loading && !error && (
           <>
-            {/* Legend */}
+            {/* Crowd legend */}
+
             <section className="mt-8">
               <div className="grid gap-3 sm:grid-cols-3">
-                {/* Low */}
                 <div className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
                   <div className="flex items-start justify-between">
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
                       <span className="h-3 w-3 rounded-full bg-emerald-500" />
                     </div>
-
                     <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-600">
                       Low
                     </span>
                   </div>
-
                   <p className="mt-4 font-bold text-slate-900">
                     5 tokens or fewer
                   </p>
-
                   <p className="mt-1 text-xs leading-5 text-slate-500">
                     Lower activity and potentially shorter waiting periods.
                   </p>
                 </div>
 
-                {/* Moderate */}
                 <div className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
                   <div className="flex items-start justify-between">
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
                       <span className="h-3 w-3 rounded-full bg-amber-500" />
                     </div>
-
                     <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-amber-600">
                       Moderate
                     </span>
                   </div>
-
                   <p className="mt-4 font-bold text-slate-900">
                     6–12 tokens
                   </p>
-
                   <p className="mt-1 text-xs leading-5 text-slate-500">
                     Typical activity with an average expected wait.
                   </p>
                 </div>
 
-                {/* High */}
                 <div className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
                   <div className="flex items-start justify-between">
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50 text-red-600">
                       <span className="h-3 w-3 rounded-full bg-red-500" />
                     </div>
-
                     <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-red-600">
                       High
                     </span>
                   </div>
-
                   <p className="mt-4 font-bold text-slate-900">
                     More than 12
                   </p>
-
                   <p className="mt-1 text-xs leading-5 text-slate-500">
                     Higher activity that may result in longer waiting periods.
                   </p>
@@ -649,29 +561,22 @@ export default function PeakHours({ user }) {
               </div>
             </section>
 
-            {/* =================================================
-                HOURLY ACTIVITY
-            ================================================= */}
+            {/* HOURLY ACTIVITY */}
 
             <section className="mt-8 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-              {/* Header */}
               <div className="border-b border-slate-200 px-6 py-6 sm:px-8">
                 <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#eaf7f5] text-[#087c78]">
-                        <ChartIcon />
-                      </div>
-
-                      <div>
-                        <h2 className="text-xl font-extrabold text-slate-900">
-                          Hourly activity
-                        </h2>
-
-                        <p className="mt-0.5 text-sm text-slate-500">
-                          Historical tokens generated by hour
-                        </p>
-                      </div>
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-[#15396B]">
+                      <ChartIcon />
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-extrabold text-[#15396B]">
+                        Hourly activity
+                      </h2>
+                      <p className="mt-0.5 text-sm text-slate-500">
+                        Historical tokens generated by hour
+                      </p>
                     </div>
                   </div>
 
@@ -682,17 +587,14 @@ export default function PeakHours({ user }) {
                 </div>
               </div>
 
-              {/* Empty state */}
               {peakHoursData.length === 0 ? (
                 <div className="px-6 py-16 text-center sm:px-8">
                   <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
                     <ChartIcon className="h-7 w-7" />
                   </div>
-
                   <h3 className="mt-5 font-bold text-slate-900">
                     No historical activity recorded
                   </h3>
-
                   <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
                     There is not enough historical queue data for this office
                     yet. Activity insights will appear here once data is
@@ -702,24 +604,22 @@ export default function PeakHours({ user }) {
               ) : (
                 <div className="p-5 sm:p-8">
                   {/* Visual bar chart */}
-                  <div className="hidden rounded-2xl border border-slate-100 bg-[#f8fbfa] p-6 lg:block">
+
+                  <div className="hidden rounded-2xl border border-slate-200 bg-[#F7F8FA] p-6 lg:block">
                     <div className="mb-6 flex items-center justify-between">
                       <div>
-                        <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
+                        <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#15396B]">
                           Activity pattern
                         </p>
-
                         <p className="mt-1 text-sm text-slate-600">
                           Taller bars indicate higher historical token volume.
                         </p>
                       </div>
-
                       <div className="text-right">
                         <p className="text-xs text-slate-500">
                           Total recorded
                         </p>
-
-                        <p className="text-lg font-extrabold text-slate-900">
+                        <p className="text-lg font-extrabold text-[#15396B]">
                           {totalTokens}
                         </p>
                       </div>
@@ -728,7 +628,6 @@ export default function PeakHours({ user }) {
                     <div className="flex h-52 items-end gap-3 overflow-x-auto pb-8">
                       {peakHoursData.map((slot) => {
                         const meta = getCrowdLevel(slot.tokenCount);
-
                         const height = Math.max(
                           8,
                           (Number(slot.tokenCount) / maxTokens) * 100
@@ -740,10 +639,9 @@ export default function PeakHours({ user }) {
                             className="group flex min-w-[58px] flex-1 flex-col items-center justify-end"
                           >
                             <div className="relative mb-2">
-                              <div className="absolute bottom-full left-1/2 mb-2 hidden -translate-x-1/2 whitespace-nowrap rounded-lg bg-[#0b2528] px-2.5 py-1.5 text-[10px] font-semibold text-white shadow-lg group-hover:block">
+                              <div className="absolute bottom-full left-1/2 mb-2 hidden -translate-x-1/2 whitespace-nowrap rounded-lg bg-[#102C52] px-2.5 py-1.5 text-[10px] font-semibold text-white shadow-lg group-hover:block">
                                 {slot.tokenCount} tokens
                               </div>
-
                               <div
                                 className={`w-8 rounded-t-lg transition-all duration-300 group-hover:w-9 ${
                                   meta.color === "green"
@@ -758,8 +656,7 @@ export default function PeakHours({ user }) {
                                 }}
                               />
                             </div>
-
-                            <span className="whitespace-nowrap text-[9px] font-semibold text-slate-400">
+                            <span className="whitespace-nowrap text-[9px] font-semibold text-slate-500">
                               {Number(slot.hour) % 12 === 0
                                 ? 12
                                 : Number(slot.hour) % 12}
@@ -772,10 +669,10 @@ export default function PeakHours({ user }) {
                   </div>
 
                   {/* Detailed rows */}
+
                   <div className="mt-5 space-y-3">
                     {peakHoursData.map((slot) => {
                       const meta = getCrowdLevel(slot.tokenCount);
-
                       const progress = Math.min(
                         100,
                         (Number(slot.tokenCount) / maxTokens) * 100
@@ -784,34 +681,29 @@ export default function PeakHours({ user }) {
                       return (
                         <div
                           key={slot.hour}
-                          className="group rounded-2xl border border-slate-100 bg-slate-50 p-4 transition hover:border-slate-200 hover:bg-white hover:shadow-sm sm:p-5"
+                          className="group rounded-2xl border border-slate-200 bg-[#F7F8FA] p-4 transition hover:border-blue-200 hover:bg-white hover:shadow-sm sm:p-5"
                         >
                           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-                            {/* Time */}
                             <div className="flex min-w-[190px] items-center gap-3">
                               <div
                                 className={`h-2.5 w-2.5 rounded-full ${meta.dot}`}
                               />
-
                               <div>
                                 <p className="font-bold text-slate-900">
                                   {formatHourSlot(slot.hour)}
                                 </p>
-
                                 <p className="mt-0.5 text-xs text-slate-500">
                                   Hourly activity
                                 </p>
                               </div>
                             </div>
 
-                            {/* Progress */}
                             <div className="flex-1">
                               <div className="mb-2 flex items-center justify-between">
                                 <span className="text-xs font-semibold text-slate-500">
                                   Queue volume
                                 </span>
-
-                                <span className="text-xs font-bold text-slate-700">
+                                <span className="text-xs font-bold text-[#15396B]">
                                   {slot.tokenCount} tokens
                                 </span>
                               </div>
@@ -832,7 +724,6 @@ export default function PeakHours({ user }) {
                               </div>
                             </div>
 
-                            {/* Level */}
                             <span
                               className={`w-fit shrink-0 rounded-full px-3 py-1.5 text-xs font-bold ${meta.bg}`}
                             >
@@ -847,27 +738,23 @@ export default function PeakHours({ user }) {
               )}
             </section>
 
-            {/* =================================================
-                RECOMMENDATION
-            ================================================= */}
+            {/* RECOMMENDATION */}
 
             {lowestSlot && (
-              <section className="relative mt-8 overflow-hidden rounded-3xl bg-[#0b2528] shadow-xl">
-                {/* Decorative circles */}
-                <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-teal-400/10 blur-2xl" />
-
-                <div className="absolute -bottom-20 left-1/3 h-48 w-48 rounded-full bg-cyan-400/5 blur-2xl" />
+              <section className="relative mt-8 overflow-hidden rounded-3xl bg-[#15396B] shadow-xl">
+                <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-amber-400/10 blur-2xl" />
+                <div className="absolute -bottom-20 left-1/3 h-48 w-48 rounded-full bg-blue-300/10 blur-2xl" />
 
                 <div className="relative grid gap-8 p-6 sm:p-8 lg:grid-cols-[1fr_auto] lg:items-center lg:p-10">
                   <div>
-                    <div className="inline-flex items-center gap-2 rounded-full border border-teal-400/20 bg-teal-400/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-teal-300">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-amber-300">
                       <SparkIcon className="h-3.5 w-3.5" />
                       Suggested time
                     </div>
 
                     <h2 className="mt-4 text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
                       Consider visiting around{" "}
-                      <span className="text-teal-300">
+                      <span className="text-[#F4B544]">
                         {formatHourSlot(lowestSlot.hour)}
                       </span>
                     </h2>
@@ -885,7 +772,7 @@ export default function PeakHours({ user }) {
                       </div>
 
                       <div className="inline-flex items-center gap-2 rounded-lg bg-white/5 px-3 py-2 text-xs font-semibold text-slate-300">
-                        <ClockIcon className="h-4 w-4 text-teal-300" />
+                        <ClockIcon className="text-amber-300" />
                         Plan ahead
                       </div>
                     </div>
@@ -896,29 +783,25 @@ export default function PeakHours({ user }) {
                     onClick={() =>
                       navigate(`/citizen/offices/${officeId}/services`)
                     }
-                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-teal-400 px-6 py-3.5 text-sm font-bold text-[#073c3b] transition hover:bg-teal-300 lg:min-w-[190px]"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#F4B544] px-6 py-3.5 text-sm font-bold text-[#15396B] transition hover:bg-amber-300 lg:min-w-[190px]"
                   >
                     Select a service
-                    <ArrowRightIcon className="h-4 w-4" />
+                    <ArrowRightIcon />
                   </button>
                 </div>
               </section>
             )}
 
-            {/* =================================================
-                INFORMATION NOTE
-            ================================================= */}
+            {/* INFORMATION NOTE */}
 
             <div className="mt-6 flex items-start gap-3 rounded-2xl border border-slate-200 bg-white p-5">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-[#15396B]">
                 <InfoIcon />
               </div>
-
               <div>
-                <p className="text-sm font-bold text-slate-800">
+                <p className="text-sm font-bold text-[#15396B]">
                   About this information
                 </p>
-
                 <p className="mt-1 text-xs leading-5 text-slate-500">
                   Crowd levels are based on historical token activity. Actual
                   waiting times may vary depending on service duration, staff
