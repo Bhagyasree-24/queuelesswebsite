@@ -7,6 +7,11 @@ const offices = [
     mandal: "Rajkot",
     district: "Rajkot",
     state: "Gujarat",
+    workingDays: [1, 2, 3, 4, 5, 6],
+    openingTime: "08:00",
+    closingTime: "20:00",
+    tokenCutoffMinutes: 0,
+    holidays: []
   },
   {
     name: "Mandal Parishad Development Office",
@@ -16,7 +21,12 @@ const offices = [
     mandal: "Rajkot",
     district: "Rajkot",
     state: "Gujarat",
-  },
+    workingDays: [1, 2, 3, 4, 5, 6],
+    openingTime: "08:00",
+    closingTime: "20:00",
+    tokenCutoffMinutes: 0,
+    holidays: []
+  }
 ];
 
 module.exports = offices;
